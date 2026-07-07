@@ -8,7 +8,7 @@ Update this file after every meaningful implementation change.
 
 ## Current Goal
 
-- `app/api/health/route.ts` — API key doğrulama
+- `app/api/transform/route.ts` — SSE streaming endpoint
 
 ## Completed
 
@@ -31,6 +31,7 @@ Update this file after every meaningful implementation change.
 - `lib/ai/prompt-engine.ts` — `buildUserPrompt()`, `buildMessages()` (template ve eşlemeler birebir)
 - `lib/ai/` tamamlandı — `GroqProvider`, `createProvider()`, `TransformOrchestrator`, `lib/utils/retry.ts` (`groq-sdk`, ön-istek retry ayrımı)
 - `lib/validation/transform-schema.ts` — `transformRequestSchema` + `TransformRequestInput` (Türkçe hata mesajları, `PLATFORM_IDS`/`TONES`/`LENGTHS` tek kaynak)
+- `app/api/health/route.ts` — GET health check (`validateConfig()`, Türkçe hata mesajları, key sızmaz)
 
 ## In Progress
 
@@ -40,16 +41,15 @@ Update this file after every meaningful implementation change.
 
 Implementation sırası (her adım uçtan uca doğrulanır):
 
-1. `app/api/health/route.ts` — API key doğrulama
-2. `app/api/transform/route.ts` — SSE streaming endpoint
-3. `lib/hooks/useTransform.ts` + `useClipboard.ts`
-4. `components/layout/` — Header, OnboardingDialog
-5. `components/transform/` — SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper
-6. `app/page.tsx` — ana ekran birleştirme
-7. Empty, loading, streaming, error, success state'leri
-8. `lib/constants/sample-article.ts` — built-in örnek makale (`project-overview.md` spec: Türkçe, 400–600 karakter, uzaktan çalışma konusu)
-9. README.md + `docs/prompt-explanation.md` + `samples/` (3 örnek çıktı)
-10. Demo hazırlığı ve `npm run build` doğrulama
+1. `app/api/transform/route.ts` — SSE streaming endpoint
+2. `lib/hooks/useTransform.ts` + `useClipboard.ts`
+3. `components/layout/` — Header, OnboardingDialog
+4. `components/transform/` — SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper
+5. `app/page.tsx` — ana ekran birleştirme
+6. Empty, loading, streaming, error, success state'leri
+7. `lib/constants/sample-article.ts` — built-in örnek makale (`project-overview.md` spec: Türkçe, 400–600 karakter, uzaktan çalışma konusu)
+8. README.md + `docs/prompt-explanation.md` + `samples/` (3 örnek çıktı)
+9. Demo hazırlığı ve `npm run build` doğrulama
 
 ## Open Questions
 
