@@ -1,0 +1,91 @@
+# Progress Tracker
+
+Update this file after every meaningful implementation change.
+
+## Current Phase
+
+- Implementation Started (Scaffold + Tema)
+
+## Current Goal
+
+- `lib/ai/prompts/` — system.ts + 8 platform prompt dosyası
+
+## Completed
+
+- Ürün keşfi ve staj görevi analizi
+- Rakip araştırması (Jasper, Copy.ai, Buffer, Writesonic, HubSpot)
+- UX planı: user journey, state matrix, layout, a11y
+- Teknik mimari kararları ve AI provider abstraction tasarımı
+- 8 MVP platform için tam prompt şablonları
+- Tasarım sistemi token'ları ve component kuralları
+- SSOT dokümantasyonu (6 context dosyası) tamamlandı
+- SSOT dokümantasyon düzeltmeleri: groq-sdk paket adı, stream iptali, retry ayrımı, health check restart UX, örnek makale spec
+- Next.js 15.5.20 scaffold (`create-next-app` + TypeScript + Tailwind CSS 4 + App Router + Turbopack)
+- `architecture.md` dosya iskeleti (placeholder dosyalar + boş `app/api/` klasörleri)
+- shadcn/ui init (Tailwind v4 uyumlu) + `globals.css` Repack tasarım token'ları (`ui-context.md`)
+- Geist Sans + Geist Mono font kurulumu (`next/font/google`, `--font-sans` / `--font-mono`)
+- `npm run build` ve `npm run dev` doğrulandı
+- `lib/constants/platforms.ts` — 8 MVP platform metadata tek kaynağı (`PlatformId`, `PLATFORMS`, `PLATFORM_BY_ID`)
+
+## In Progress
+
+- None.
+
+## Next Up
+
+Implementation sırası (her adım uçtan uca doğrulanır):
+
+1. `lib/ai/prompts/` — system.ts + 8 platform prompt dosyası
+2. `lib/ai/` — types, provider-factory, groq-provider (`groq-sdk`), prompt-engine, transform-orchestrator
+3. `lib/validation/transform-schema.ts` — Zod şemaları
+4. `app/api/health/route.ts` — API key doğrulama
+5. `app/api/transform/route.ts` — SSE streaming endpoint
+6. `lib/hooks/useTransform.ts` + `useClipboard.ts`
+7. `components/layout/` — Header, OnboardingDialog
+8. `components/transform/` — SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper
+9. `app/page.tsx` — ana ekran birleştirme
+10. Empty, loading, streaming, error, success state'leri
+11. `lib/constants/sample-article.ts` — built-in örnek makale (`project-overview.md` spec: Türkçe, 400–600 karakter, uzaktan çalışma konusu)
+12. README.md + `docs/prompt-explanation.md` + `samples/` (3 örnek çıktı)
+13. Demo hazırlığı ve `npm run build` doğrulama
+
+## Open Questions
+
+- None. Tüm planlama kararları verildi ve context dosyalarına işlendi.
+
+## Architecture Decisions
+
+| ID   | Karar | Gerekçe | Tarih |
+| ---- | ----- | ------- | ----- |
+| ADR-001 | Next.js 15 + TypeScript + App Router | Streaming SSE, API routes ile güvenli Groq key, profesyonel UX | 2026-07-08 |
+| ADR-002 | Groq API (`llama-3.3-70b-versatile`) v1 tek sağlayıcı | Staj sheet önerisi, ücretsiz tier, hızlı inference | 2026-07-08 |
+| ADR-003 | AI Provider interface + factory pattern | OpenAI, Gemini, Claude ileride minimum değişiklikle eklenebilir | 2026-07-08 |
+| ADR-004 | SSE streaming zorunlu | UX önceliği; boş bekleme yerine token-by-token çıktı | 2026-07-08 |
+| ADR-005 | Dark-first tema, shadcn/ui + Tailwind CSS 4 | Profesyonel workspace hissi, hızlı component geliştirme | 2026-07-08 |
+| ADR-006 | Türkçe arayüz | Staj sorumlusu ve demo hedef kitlesi Türkçe | 2026-07-08 |
+| ADR-007 | Auth/DB yok, lokal-only | Proje kapsamı; Just Enough Architecture | 2026-07-08 |
+| ADR-008 | MVP'de 8 platform, V2'de 3 platform daha | 1-2 gün süre kısıtı; demo için 8 format yeterli | 2026-07-08 |
+| ADR-009 | React state (MVP), localStorage geçmiş (V2) | Basitlik; kalıcı storage MVP'de gerekmez | 2026-07-08 |
+| ADR-010 | Platform metadata tek kaynak: `lib/constants/platforms.ts` | Senkronizasyon; docs ve kod arasında tutarlılık | 2026-07-08 |
+| ADR-011 | 3 katmanlı prompt (system + platform + user) | Prompt kalitesi değerlendirme kriteri; kanal-spesifik kontrol | 2026-07-08 |
+| ADR-012 | Zod validasyon API boundary'de | Type-safe input; Türkçe hata mesajları | 2026-07-08 |
+| ADR-013 | Ürün adı: Repack (iç), İçerik Dönüştürücü (UI) | Kısa internal referans + açıklayıcı Türkçe başlık | 2026-07-08 |
+
+## Session Notes
+
+- Repository yalnızca 6 markdown context dosyasından oluşuyordu; kod henüz yoktu.
+- Onaylanan stack: Next.js 15, TypeScript, Tailwind, shadcn/ui, Groq API.
+- Onaylanan UI dili: Türkçe.
+- Ender'in görevi (AI Destekli İçerik Üretici) bu repo kapsamı dışında.
+- Scaffold tamamlandı: Next.js 15.5.20, Tailwind CSS 4, shadcn/ui v4 init, dark-first tema token'ları.
+- Klasör adı npm kısıtı nedeniyle `repack-scaffold` alt klasöründe oluşturulup köke taşındı; paket adı `repack`.
+- API route dosyaları henüz yazılmadı (adım 5–6); `app/api/transform/` ve `app/api/health/` boş klasör olarak hazır.
+- Teslim paketi için README, `docs/prompt-explanation.md` ve `samples/` klasörü implementation sonunda oluşturulacak.
+
+## Related Documents
+
+- Ürün spec: `project-overview.md`
+- Mimari: `architecture.md`
+- AI kuralları: `ai-workflow-rules.md`
+- UI: `ui-context.md`
+- Kod standartları: `code-standards.md`

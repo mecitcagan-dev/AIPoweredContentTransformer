@@ -1,0 +1,1 @@
+// Placeholder: useClipboard hook
