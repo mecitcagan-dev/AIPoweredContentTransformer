@@ -8,7 +8,7 @@ Update this file after every meaningful implementation change.
 
 ## Current Goal
 
-- `lib/ai/` — provider-factory.ts, groq-provider.ts, transform-orchestrator.ts (adım 1, 2. yarı)
+- `lib/validation/transform-schema.ts` — Zod şemaları
 
 ## Completed
 
@@ -29,6 +29,7 @@ Update this file after every meaningful implementation change.
 - `lib/ai/prompts/` — `SYSTEM_PROMPT` + 8 platform prompt dosyası + `PLATFORM_PROMPTS` lookup (`ai-workflow-rules.md` birebir)
 - `lib/ai/types.ts` — `TransformRequest`, `AIProvider`, `Tone`, `Length` (`as const` + derived type)
 - `lib/ai/prompt-engine.ts` — `buildUserPrompt()`, `buildMessages()` (template ve eşlemeler birebir)
+- `lib/ai/` tamamlandı — `GroqProvider`, `createProvider()`, `TransformOrchestrator`, `lib/utils/retry.ts` (`groq-sdk`, ön-istek retry ayrımı)
 
 ## In Progress
 
@@ -38,18 +39,17 @@ Update this file after every meaningful implementation change.
 
 Implementation sırası (her adım uçtan uca doğrulanır):
 
-1. `lib/ai/` — **1. adımın 2. yarısı kaldı:** `provider-factory.ts`, `groq-provider.ts`, `transform-orchestrator.ts`
-2. `lib/validation/transform-schema.ts` — Zod şemaları
-3. `app/api/health/route.ts` — API key doğrulama
-4. `app/api/transform/route.ts` — SSE streaming endpoint
-5. `lib/hooks/useTransform.ts` + `useClipboard.ts`
-6. `components/layout/` — Header, OnboardingDialog
-7. `components/transform/` — SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper
-8. `app/page.tsx` — ana ekran birleştirme
-9. Empty, loading, streaming, error, success state'leri
-10. `lib/constants/sample-article.ts` — built-in örnek makale (`project-overview.md` spec: Türkçe, 400–600 karakter, uzaktan çalışma konusu)
-11. README.md + `docs/prompt-explanation.md` + `samples/` (3 örnek çıktı)
-12. Demo hazırlığı ve `npm run build` doğrulama
+1. `lib/validation/transform-schema.ts` — Zod şemaları
+2. `app/api/health/route.ts` — API key doğrulama
+3. `app/api/transform/route.ts` — SSE streaming endpoint
+4. `lib/hooks/useTransform.ts` + `useClipboard.ts`
+5. `components/layout/` — Header, OnboardingDialog
+6. `components/transform/` — SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper
+7. `app/page.tsx` — ana ekran birleştirme
+8. Empty, loading, streaming, error, success state'leri
+9. `lib/constants/sample-article.ts` — built-in örnek makale (`project-overview.md` spec: Türkçe, 400–600 karakter, uzaktan çalışma konusu)
+10. README.md + `docs/prompt-explanation.md` + `samples/` (3 örnek çıktı)
+11. Demo hazırlığı ve `npm run build` doğrulama
 
 ## Open Questions
 
