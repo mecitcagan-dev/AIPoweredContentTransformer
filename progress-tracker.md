@@ -8,7 +8,7 @@ Update this file after every meaningful implementation change.
 
 ## Current Goal
 
-- `components/transform/` — SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper
+- `components/transform/` — PlatformSelector, TransformSettings, TransformButton, TransformStepper
 
 ## Completed
 
@@ -35,6 +35,8 @@ Update this file after every meaningful implementation change.
 - `app/api/transform/route.ts` + `lib/utils/sse.ts` — POST SSE streaming (validate → orchestrate → stream; ön-istek JSON hata, stream-ortası SSE error event)
 - `lib/hooks/useTransform.ts` + `useClipboard.ts` — SSE tüketimi, AbortController stream iptali, panoya kopyalama
 - `components/layout/Header.tsx` + `OnboardingDialog.tsx` — üst bar, FTUE dialog, health check test akışı
+- `lib/constants/sample-article.ts` — built-in örnek makale (Türkçe, 581 karakter, uzaktan çalışma konusu)
+- `components/transform/SourcePanel.tsx` + `OutputPanel.tsx` — kaynak/çıktı panelleri (UX state matrix, a11y, Türkçe)
 
 ## In Progress
 
@@ -44,12 +46,11 @@ Update this file after every meaningful implementation change.
 
 Implementation sırası (her adım uçtan uca doğrulanır):
 
-1. `components/transform/` — SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper
+1. `components/transform/` — PlatformSelector, TransformSettings, TransformButton, TransformStepper (`SourcePanel`, `OutputPanel` tamam)
 2. `app/page.tsx` — ana ekran birleştirme
 3. Empty, loading, streaming, error, success state'leri
-4. `lib/constants/sample-article.ts` — built-in örnek makale (`project-overview.md` spec: Türkçe, 400–600 karakter, uzaktan çalışma konusu)
-5. README.md + `docs/prompt-explanation.md` + `samples/` (3 örnek çıktı)
-6. Demo hazırlığı ve `npm run build` doğrulama
+4. README.md + `docs/prompt-explanation.md` + `samples/` (3 örnek çıktı)
+5. Demo hazırlığı ve `npm run build` doğrulama
 
 ## Open Questions
 
@@ -82,6 +83,7 @@ Implementation sırası (her adım uçtan uca doğrulanır):
 - Scaffold tamamlandı: Next.js 15.5.20, Tailwind CSS 4, shadcn/ui v4 init, dark-first tema token'ları.
 - Klasör adı npm kısıtı nedeniyle `repack-scaffold` alt klasöründe oluşturulup köke taşındı; paket adı `repack`.
 - API route dosyaları henüz yazılmadı (adım 5–6); `app/api/transform/` ve `app/api/health/` boş klasör olarak hazır.
+- `components/transform/` — SourcePanel, OutputPanel tamam; PlatformSelector, TransformSettings, TransformButton, TransformStepper kaldı.
 - Teslim paketi için README, `docs/prompt-explanation.md` ve `samples/` klasörü implementation sonunda oluşturulacak.
 
 ## Related Documents
