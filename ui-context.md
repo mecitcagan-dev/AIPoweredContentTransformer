@@ -142,6 +142,8 @@ Lucide React. Stroke-based ikonlar only.
 | Warning  | Sarı banner (4000+ karakter) | "Uzun metinlerde dönüşüm kalitesi düşebilir" |
 | Error    | Kırmızı inline mesaj | "En az 50 karakter girin" (submit engellenir) |
 
+**Textarea davranışı:** Sabit min-height (320px) korunur, ayrıca max-height (480px) tanımlanır. İçerik max-height'ı aştığında textarea büyümeyi durdurur, içeride dikey scroll (`overflow-y-auto`) aktif olur. Bu sayede panel yüksekliği sabit kalır; karakter sayacı ve 4000+ uyarı banner'ı her zaman görünür alanda kalır, kullanıcı ayrıca sayfa scroll etmek zorunda kalmaz.
+
 ### Çıktı Paneli
 
 | State     | Görünüm | Davranış |

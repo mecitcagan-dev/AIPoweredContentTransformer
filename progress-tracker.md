@@ -4,11 +4,11 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Implementation Started (Scaffold + Tema)
+- Demo Ready
 
 ## Current Goal
 
-- README.md + `docs/prompt-explanation.md` + `samples/` (3 örnek çıktı)
+- Demo hazırlığı ve `npm run build` doğrulama
 
 ## Completed
 
@@ -39,6 +39,8 @@ Update this file after every meaningful implementation change.
 - `components/transform/SourcePanel.tsx` + `OutputPanel.tsx` — kaynak/çıktı panelleri (UX state matrix, a11y, Türkçe)
 - `components/transform/` tamamlandı — PlatformSelector, TransformSettings, TransformButton, TransformStepper (+ shadcn collapsible, input, label)
 - `app/page.tsx` — ana ekran birleştirme (`useHealthCheck`, tüm transform component'leri, FTUE OnboardingDialog, Sonner toast)
+- Teslim paketi dokümantasyonu — `README.md`, `docs/prompt-explanation.md`, `samples/` (3 örnek çıktı)
+- SourcePanel textarea max-height + scroll davranışı eklendi (`ui-context.md`'ye işlendi)
 
 ## In Progress
 
@@ -48,8 +50,7 @@ Update this file after every meaningful implementation change.
 
 Implementation sırası (her adım uçtan uca doğrulanır):
 
-1. README.md + `docs/prompt-explanation.md` + `samples/` (3 örnek çıktı)
-2. Demo hazırlığı ve `npm run build` doğrulama
+1. Demo hazırlığı ve `npm run build` doğrulama
 
 ## Open Questions
 
@@ -83,7 +84,7 @@ Implementation sırası (her adım uçtan uca doğrulanır):
 - Klasör adı npm kısıtı nedeniyle `repack-scaffold` alt klasöründe oluşturulup köke taşındı; paket adı `repack`.
 - API route dosyaları henüz yazılmadı (adım 5–6); `app/api/transform/` ve `app/api/health/` boş klasör olarak hazır.
 - `components/transform/` tamamlandı — 6 component (SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper).
-- Teslim paketi için README, `docs/prompt-explanation.md` ve `samples/` klasörü implementation sonunda oluşturulacak.
+- Teslim paketi tamamlandı: README, `docs/prompt-explanation.md`, `samples/` (3 örnek çıktı).
 
 ## Related Documents
 

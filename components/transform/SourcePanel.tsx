@@ -83,7 +83,7 @@ export function SourcePanel({ value, onChange }: SourcePanelProps) {
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder="Dönüştürmek istediğiniz makaleyi buraya yapıştırın veya dosya yükleyin."
-        className="min-h-[320px] resize-y border-border-default bg-bg-base text-sm text-text-primary"
+        className="min-h-[320px] max-h-[480px] overflow-y-auto resize-y border-border-default bg-bg-base text-sm text-text-primary"
         aria-label="Kaynak metin"
         aria-describedby={describedBy || undefined}
         aria-invalid={showError}
