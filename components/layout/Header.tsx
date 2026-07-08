@@ -1,9 +1,7 @@
 "use client";
 
 import { Settings, Sparkles } from "lucide-react";
-import { useState } from "react";
 
-import { OnboardingDialog } from "@/components/layout/OnboardingDialog";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -12,9 +10,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export function Header() {
-  const [settingsOpen, setSettingsOpen] = useState(false);
+export interface HeaderProps {
+  onOpenSettings: () => void;
+}
 
+export function Header({ onOpenSettings }: HeaderProps) {
   return (
     <TooltipProvider>
       <header className="flex h-14 items-center justify-between border-b border-border-default px-4 md:px-6">
@@ -35,7 +35,7 @@ export function Header() {
                 variant="ghost"
                 size="icon"
                 aria-label="API anahtarı yapılandırması"
-                onClick={() => setSettingsOpen(true)}
+                onClick={onOpenSettings}
               />
             }
           >
@@ -44,12 +44,6 @@ export function Header() {
           <TooltipContent>API anahtarı yapılandırması</TooltipContent>
         </Tooltip>
       </header>
-
-      <OnboardingDialog
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-        closable
-      />
     </TooltipProvider>
   );
 }

@@ -23,6 +23,7 @@ export interface OutputPanelProps {
   error: string | null;
   platformLabel?: string;
   onRetry?: () => void;
+  onCopySuccess?: () => void;
 }
 
 function usePrefersReducedMotion(): boolean {
@@ -49,6 +50,7 @@ export function OutputPanel({
   error,
   platformLabel,
   onRetry,
+  onCopySuccess,
 }: OutputPanelProps) {
   const { copy, copied } = useClipboard();
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -107,6 +109,7 @@ export function OutputPanel({
     }
 
     await copy(output);
+    onCopySuccess?.();
   };
 
   return (
