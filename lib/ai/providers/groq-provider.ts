@@ -42,12 +42,15 @@ function isValidGroqApiKey(apiKey: string | undefined): boolean {
 export class GroqProvider implements AIProvider {
   readonly name = "groq";
 
+  private readonly apiKey: string;
   private readonly client: Groq;
 
-  constructor() {
-    const apiKey = process.env.GROQ_API_KEY;
+  /** @param apiKey İstek başına key (BYOK). Verilmezse `GROQ_API_KEY` env fallback. */
+  constructor(apiKey?: string) {
+    const resolvedKey = apiKey?.trim() || process.env.GROQ_API_KEY?.trim() || "";
+    this.apiKey = resolvedKey;
     this.client = new Groq({
-      apiKey: apiKey ?? "",
+      apiKey: resolvedKey,
     });
   }
 
@@ -75,6 +78,15 @@ export class GroqProvider implements AIProvider {
   }
 
   async validateConfig(): Promise<boolean> {
-    return isValidGroqApiKey(process.env.GROQ_API_KEY);
+    if (!isValidGroqApiKey(this.apiKey)) {
+      return false;
+    }
+
+    try {
+      await this.client.models.list();
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

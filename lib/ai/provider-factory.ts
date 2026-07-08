@@ -4,10 +4,10 @@ import { GroqProvider } from "@/lib/ai/providers/groq-provider";
 export type ProviderType = "groq";
 
 /** Provider factory — yalnızca Groq implementasyonu (v1). */
-export function createProvider(type: ProviderType): AIProvider {
+export function createProvider(type: ProviderType, apiKey?: string): AIProvider {
   switch (type) {
     case "groq":
-      return new GroqProvider();
+      return new GroqProvider(apiKey);
     default: {
       const exhaustiveCheck: never = type;
       throw new Error(`Unknown provider type: ${exhaustiveCheck}`);

@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  getGroqApiKeyHeaders,
+  getStoredApiKey,
+  setStoredApiKey,
+} from "@/lib/utils/api-key-storage";
 
 const GROQ_CONSOLE_URL = "https://console.groq.com/keys";
 const DEV_RESTART_MESSAGE =
@@ -39,9 +46,19 @@ export function OnboardingDialog({
   closable = false,
   onSuccess,
 }: OnboardingDialogProps) {
+  const [apiKeyInput, setApiKeyInput] = useState("");
   const [testStatus, setTestStatus] = useState<TestStatus>("idle");
   const [testMessage, setTestMessage] = useState<string | null>(null);
   const hasEverSucceededRef = useRef(false);
+
+  useEffect(() => {
+    if (open) {
+      const storedKey = getStoredApiKey();
+      setApiKeyInput(storedKey ?? "");
+      setTestStatus("idle");
+      setTestMessage(null);
+    }
+  }, [open]);
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
@@ -59,12 +76,23 @@ export function OnboardingDialog({
     [closable, onOpenChange],
   );
 
-  const handleTestConnection = useCallback(async () => {
+  const handleSaveAndTest = useCallback(async () => {
+    const trimmedKey = apiKeyInput.trim();
+
+    if (!trimmedKey) {
+      setTestStatus("error");
+      setTestMessage("API anahtarı bulunamadı");
+      return;
+    }
+
     setTestStatus("loading");
     setTestMessage(null);
+    setStoredApiKey(trimmedKey);
 
     try {
-      const response = await fetch("/api/health");
+      const response = await fetch("/api/health", {
+        headers: getGroqApiKeyHeaders(),
+      });
 
       let data: HealthResponse | null = null;
 
@@ -79,7 +107,11 @@ export function OnboardingDialog({
         setTestStatus("success");
         setTestMessage("Bağlantı başarılı. Uygulamayı kullanmaya başlayabilirsiniz.");
         onSuccess?.();
-        handleOpenChange(false);
+
+        if (closable) {
+          handleOpenChange(false);
+        }
+
         return;
       }
 
@@ -107,7 +139,7 @@ export function OnboardingDialog({
 
       setTestMessage("Bağlantı hatası. İnternet bağlantınızı kontrol edin.");
     }
-  }, [handleOpenChange, onSuccess]);
+  }, [apiKeyInput, closable, handleOpenChange, onSuccess]);
 
   return (
     <Dialog
@@ -126,7 +158,7 @@ export function OnboardingDialog({
             API Anahtarı Yapılandırması
           </DialogTitle>
           <DialogDescription id="onboarding-description">
-            Groq API anahtarınızı yapılandırarak içerik dönüştürme özelliğini
+            Groq API anahtarınızı girerek içerik dönüştürme özelliğini
             etkinleştirin.
           </DialogDescription>
         </DialogHeader>
@@ -144,11 +176,23 @@ export function OnboardingDialog({
           </p>
 
           <div className="space-y-2">
-            <p className="font-medium">`.env.local` dosyasına ekleyin:</p>
-            <pre className="overflow-x-auto rounded-lg border border-border-default bg-bg-elevated p-3 font-mono text-xs text-text-muted">
-              GROQ_API_KEY=gsk_...
-            </pre>
+            <Label htmlFor="groq-api-key-input">API Anahtarı</Label>
+            <Input
+              id="groq-api-key-input"
+              type="password"
+              value={apiKeyInput}
+              onChange={(event) => setApiKeyInput(event.target.value)}
+              placeholder="gsk_..."
+              autoComplete="off"
+              aria-label="Groq API anahtarı"
+              className="border-border-default bg-bg-base font-mono text-text-primary"
+            />
           </div>
+
+          <p className="text-xs text-text-muted">
+            API anahtarınız yalnızca bu tarayıcıda saklanır, hiçbir sunucuya
+            kaydedilmez.
+          </p>
 
           {testStatus === "success" && testMessage && (
             <p className="text-state-success" role="status">
@@ -166,9 +210,9 @@ export function OnboardingDialog({
         <DialogFooter className="gap-2 sm:justify-start">
           <Button
             type="button"
-            onClick={handleTestConnection}
+            onClick={handleSaveAndTest}
             disabled={testStatus === "loading"}
-            aria-label="Bağlantıyı test et"
+            aria-label="API anahtarını kaydet ve test et"
           >
             {testStatus === "loading" ? (
               <>
@@ -176,7 +220,7 @@ export function OnboardingDialog({
                 Test ediliyor...
               </>
             ) : (
-              "Bağlantıyı Test Et"
+              "Kaydet ve Test Et"
             )}
           </Button>
 

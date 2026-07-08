@@ -156,11 +156,24 @@ types/
 
 ## Auth and Access Model
 
-Bu uygulama lokal, tek kullanıcılıdır. Authentication veya authorization katmanı yoktur.
+Bu uygulama authentication veya authorization katmanı içermez. API anahtarı yönetimi iki modda çalışır:
 
-- API anahtarı `.env.local` dosyasında tutulur ve yalnızca server-side route handler'lar tarafından okunur.
-- Client tarafına API anahtarı asla gönderilmez veya expose edilmez.
-- `/api/health` yalnızca anahtarın geçerliliğini kontrol eder; anahtar değerini response'a dahil etmez.
+### Local mod (main branch / geliştirme)
+
+- API anahtarı `.env.local` dosyasında `GROQ_API_KEY` olarak tutulur.
+- Yalnızca server-side route handler'lar `process.env` üzerinden okur.
+- Client isteklerinde `x-groq-api-key` header'ı gönderilmez; sunucu env key'e fallback yapar.
+
+### Cloud / BYOK mod (`cloud-deploy` branch)
+
+- API anahtarı sunucuda **asla** saklanmaz veya persist edilmez.
+- Kullanıcı kendi Groq anahtarını tarayıcıda `localStorage` (`repack_groq_api_key`) içinde tutar.
+- Her `/api/transform` ve `/api/health` isteğinde client `x-groq-api-key` header'ı gönderir.
+- Sunucu bu key'i yalnızca o istek süresince Groq API'ye iletmek için kullanır (proxy görevi); key loglanmaz, response'a dahil edilmez, disk/DB'ye yazılmaz.
+- Header yoksa ve `GROQ_API_KEY` env de tanımlı değilse istek `400` + `"API anahtarı bulunamadı"` ile reddedilir.
+- Header yoksa ancak env key varsa (local geliştirme uyumluluğu) sunucu env key'e fallback yapar.
+
+`/api/health` yalnızca anahtarın geçerliliğini kontrol eder; anahtar değerini response'a dahil etmez.
 
 ## Dependency Rules
 
@@ -178,7 +191,7 @@ app/api/ → lib/ai/, lib/validation/
 
 ## Invariants
 
-1. **API key asla client'a sızmaz** — `GROQ_API_KEY` yalnızca `process.env` üzerinden server route'larda okunur.
+1. **API key server'da asla persist edilmez veya loglanmaz** — BYOK modunda client zaten key'in sahibidir; sunucu yalnızca istek süresince proxy görevi görür. Local modda key `process.env.GROQ_API_KEY` üzerinden okunur; client'a response veya log ile sızdırılmaz.
 2. **Streaming zorunlu** — Tüm AI dönüşüm yanıtları SSE ile stream edilir; tam yanıt beklenmez.
 3. **Prompt template'leri merkezi** — Platform prompt'ları yalnızca `lib/ai/prompts/` altında tanımlanır.
 4. **Platform metadata tek kaynak** — Platform listesi, limitler ve etiketler yalnızca `lib/constants/platforms.ts` dosyasında tutulur.
@@ -187,6 +200,12 @@ app/api/ → lib/ai/, lib/validation/
 7. **Tutarlı hata formatı** — JSON hatalar `{ error: string }` shape'inde döner.
 8. **Auth/DB yok** — MVP'de authentication, veritabanı veya harici storage kullanılmaz.
 9. **Yeni transform isteği önceki stream'i iptal eder** — Yeni dönüştürme başladığında client tarafında `AbortController` ile önceki fetch/SSE iptal edilir; kısmi çıktı temizlenir (`useTransform` hook'u).
+
+## Architecture Decisions (cloud-deploy)
+
+| ID      | Karar | Gerekçe | Tarih |
+| ------- | ----- | ------- | ----- |
+| ADR-014 | BYOK modu: Vercel deploy için client-side key yönetimi | Herkesin kendi Groq quota'sını kullanması, sunucu tarafında key paylaşımı riskini ortadan kaldırma | 2026-07-08 |
 
 ## Related Documents
 

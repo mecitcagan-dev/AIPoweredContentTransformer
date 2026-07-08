@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 
 import type { TransformRequestInput } from "@/lib/validation/transform-schema";
+import { getGroqApiKeyHeaders } from "@/lib/utils/api-key-storage";
 import type { SseChunkPayload, SseErrorPayload } from "@/lib/utils/sse";
 
 export type TransformState =
@@ -127,6 +128,7 @@ export function useTransform() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getGroqApiKeyHeaders(),
         },
         body: JSON.stringify(request),
         signal: controller.signal,

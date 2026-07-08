@@ -8,7 +8,7 @@ Update this file after every meaningful implementation change.
 
 ## Current Goal
 
-- Demo hazırlığı ve `npm run build` doğrulama
+- Vercel deploy testi
 
 ## Completed
 
@@ -42,6 +42,10 @@ Update this file after every meaningful implementation change.
 - Teslim paketi dokümantasyonu — `README.md`, `docs/prompt-explanation.md`, `samples/` (3 örnek çıktı)
 - SourcePanel textarea max-height + scroll davranışı eklendi (`ui-context.md`'ye işlendi)
 
+## Cloud Deploy (Branch: `cloud-deploy`)
+
+- BYOK modu: client-side `localStorage` + `x-groq-api-key` header, server proxy (ADR-014) — tamamlandı
+
 ## In Progress
 
 - None.
@@ -50,7 +54,7 @@ Update this file after every meaningful implementation change.
 
 Implementation sırası (her adım uçtan uca doğrulanır):
 
-1. Demo hazırlığı ve `npm run build` doğrulama
+1. Vercel deploy testi
 
 ## Open Questions
 
@@ -73,6 +77,7 @@ Implementation sırası (her adım uçtan uca doğrulanır):
 | ADR-011 | 3 katmanlı prompt (system + platform + user) | Prompt kalitesi değerlendirme kriteri; kanal-spesifik kontrol | 2026-07-08 |
 | ADR-012 | Zod validasyon API boundary'de | Type-safe input; Türkçe hata mesajları | 2026-07-08 |
 | ADR-013 | Ürün adı: Repack (iç), İçerik Dönüştürücü (UI) | Kısa internal referans + açıklayıcı Türkçe başlık | 2026-07-08 |
+| ADR-014 | BYOK modu: Vercel deploy için client-side key yönetimi | Herkesin kendi Groq quota'sını kullanması, sunucu tarafında key paylaşımı riskini ortadan kaldırma | 2026-07-08 |
 
 ## Session Notes
 

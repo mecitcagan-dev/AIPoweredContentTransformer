@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import {
+  getGroqApiKeyHeaders,
+} from "@/lib/utils/api-key-storage";
+
 interface HealthResponse {
   ok: boolean;
   error?: string;
@@ -12,7 +16,9 @@ export function useHealthCheck() {
 
   const checkHealth = useCallback(async (): Promise<boolean> => {
     try {
-      const response = await fetch("/api/health");
+      const response = await fetch("/api/health", {
+        headers: getGroqApiKeyHeaders(),
+      });
       const data = (await response.json()) as HealthResponse;
       const isHealthy = data.ok === true;
       setHasApiKey(isHealthy);

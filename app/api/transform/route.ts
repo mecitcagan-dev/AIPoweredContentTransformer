@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { APIError } from "groq-sdk";
 
+import { createProvider } from "@/lib/ai/provider-factory";
 import { TransformOrchestrator } from "@/lib/ai/transform-orchestrator";
 import { transformRequestSchema } from "@/lib/validation/transform-schema";
 import { getErrorStatus } from "@/lib/utils/retry";
+import { resolveGroqApiKey } from "@/lib/utils/resolve-groq-api-key";
 import {
   encodeChunkEvent,
   encodeDoneEvent,
@@ -83,7 +85,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error }, { status: 400 });
   }
 
-  const orchestrator = new TransformOrchestrator();
+  const apiKey = resolveGroqApiKey(request);
+
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: "API anahtarı bulunamadı" },
+      { status: 400 },
+    );
+  }
+
+  const orchestrator = new TransformOrchestrator(createProvider("groq", apiKey));
   const tokenStream = orchestrator.transform(parsed.data);
   const iterator = tokenStream[Symbol.asyncIterator]();
 

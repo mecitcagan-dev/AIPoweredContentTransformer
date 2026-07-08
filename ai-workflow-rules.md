@@ -211,6 +211,8 @@ Format kuralları:
 
 NPM paketi: `groq-sdk` (import: `import Groq from "groq-sdk"`).
 
+**BYOK modu (`cloud-deploy`):** `GroqProvider` constructor'ı `apiKey` parametresi alır. Parametre verilmezse `process.env.GROQ_API_KEY`'e fallback yapılır (yalnızca local geliştirme kolaylığı). Cloud ortamında key `x-groq-api-key` header'ı üzerinden istek başına iletilir.
+
 | Parametre | Değer | Gerekçe |
 |-----------|-------|---------|
 | Model | `llama-3.3-70b-versatile` | Yüksek kalite, Groq free tier'da mevcut |
