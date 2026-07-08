@@ -8,7 +8,7 @@ Update this file after every meaningful implementation change.
 
 ## Current Goal
 
-- `components/layout/` — Header, OnboardingDialog
+- `components/transform/` — SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper
 
 ## Completed
 
@@ -34,6 +34,7 @@ Update this file after every meaningful implementation change.
 - `app/api/health/route.ts` — GET health check (`validateConfig()`, Türkçe hata mesajları, key sızmaz)
 - `app/api/transform/route.ts` + `lib/utils/sse.ts` — POST SSE streaming (validate → orchestrate → stream; ön-istek JSON hata, stream-ortası SSE error event)
 - `lib/hooks/useTransform.ts` + `useClipboard.ts` — SSE tüketimi, AbortController stream iptali, panoya kopyalama
+- `components/layout/Header.tsx` + `OnboardingDialog.tsx` — üst bar, FTUE dialog, health check test akışı
 
 ## In Progress
 
@@ -43,13 +44,12 @@ Update this file after every meaningful implementation change.
 
 Implementation sırası (her adım uçtan uca doğrulanır):
 
-1. `components/layout/` — Header, OnboardingDialog
-2. `components/transform/` — SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper
-3. `app/page.tsx` — ana ekran birleştirme
-4. Empty, loading, streaming, error, success state'leri
-5. `lib/constants/sample-article.ts` — built-in örnek makale (`project-overview.md` spec: Türkçe, 400–600 karakter, uzaktan çalışma konusu)
-6. README.md + `docs/prompt-explanation.md` + `samples/` (3 örnek çıktı)
-7. Demo hazırlığı ve `npm run build` doğrulama
+1. `components/transform/` — SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper
+2. `app/page.tsx` — ana ekran birleştirme
+3. Empty, loading, streaming, error, success state'leri
+4. `lib/constants/sample-article.ts` — built-in örnek makale (`project-overview.md` spec: Türkçe, 400–600 karakter, uzaktan çalışma konusu)
+5. README.md + `docs/prompt-explanation.md` + `samples/` (3 örnek çıktı)
+6. Demo hazırlığı ve `npm run build` doğrulama
 
 ## Open Questions
 
