@@ -41,7 +41,7 @@ export function TransformSettings({
             <Button
               type="button"
               variant="ghost"
-              className="group flex w-full items-center justify-between px-0 hover:bg-transparent"
+              className="group flex w-full items-center justify-between px-3 py-1.5 hover:bg-transparent"
               aria-label="Gelişmiş ayarları aç veya kapat"
             />
           }
@@ -79,7 +79,7 @@ export function TransformSettings({
                     aria-label={`Ton: ${option}`}
                     onClick={() => onToneChange(option)}
                     className={cn(
-                      "rounded-lg border px-3 py-1.5 text-sm transition-colors",
+                      "cursor-pointer rounded-lg border px-3 py-1.5 text-sm transition-colors",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base",
                       tone === option
                         ? "border-accent-primary bg-accent-primary/10 text-text-primary"
@@ -122,7 +122,7 @@ export function TransformSettings({
                     aria-label={`Uzunluk: ${option}`}
                     onClick={() => onLengthChange(option)}
                     className={cn(
-                      "rounded-lg border px-3 py-1.5 text-sm transition-colors",
+                      "cursor-pointer rounded-lg border px-3 py-1.5 text-sm transition-colors",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base",
                       length === option
                         ? "border-accent-primary bg-accent-primary/10 text-text-primary"

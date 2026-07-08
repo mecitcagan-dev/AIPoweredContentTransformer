@@ -126,6 +126,36 @@
   html {
     @apply font-sans;
   }
+
+  a[href] {
+    @apply cursor-pointer;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="radio"]:not(:disabled):not([aria-disabled="true"]),
+  [role="checkbox"]:not(:disabled),
+  [role="tab"]:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"]:disabled,
+  [role="button"][aria-disabled="true"],
+  [role="radio"]:disabled,
+  [role="radio"][aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  input:not(:disabled):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]),
+  textarea:not(:disabled) {
+    cursor: text;
+  }
+
+  label[for] {
+    cursor: text;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

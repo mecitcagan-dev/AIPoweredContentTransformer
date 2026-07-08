@@ -114,8 +114,9 @@ export function PlatformSelector({
                       disabled={disabled}
                       onClick={() => handlePlatformClick(platform.id)}
                       className={cn(
-                        "flex min-w-[140px] shrink-0 snap-start flex-col items-start gap-2 rounded-lg border p-3 text-left transition-colors",
+                        "flex min-w-[140px] shrink-0 cursor-pointer snap-start flex-col items-start gap-2 rounded-lg border p-3 text-left transition-colors",
                         "hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base",
+                        "disabled:cursor-not-allowed",
                         "md:min-w-0",
                         isSelected
                           ? "border-accent-primary bg-accent-primary/10"

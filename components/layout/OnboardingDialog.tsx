@@ -169,7 +169,7 @@ export function OnboardingDialog({
               href={GROQ_CONSOLE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-accent-primary underline underline-offset-2 hover:text-accent-hover"
+              className="text-accent-primary underline underline-offset-2 hover:text-accent-hover cursor-pointer"
             >
               Groq API anahtarınızı buradan alın
             </a>
@@ -212,7 +212,7 @@ export function OnboardingDialog({
             type="button"
             onClick={handleSaveAndTest}
             disabled={testStatus === "loading"}
-            aria-label="API anahtarını kaydet ve test et"
+            aria-label="API anahtarını kaydet"
           >
             {testStatus === "loading" ? (
               <>
@@ -220,7 +220,7 @@ export function OnboardingDialog({
                 Test ediliyor...
               </>
             ) : (
-              "Kaydet ve Test Et"
+              "Kaydet"
             )}
           </Button>
 

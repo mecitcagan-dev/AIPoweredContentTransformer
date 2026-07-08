@@ -11,7 +11,7 @@
 - **Kaynak girişi:** Metin yapıştırma, `.txt` / `.md` dosya yükleme, yerleşik örnek makale
 - **Dönüşüm ayarları:** Ton (Profesyonel / Samimi / İkna Edici), hedef kitle, uzunluk (Kısa / Orta / Uzun)
 - **Profesyonel UX:** Loading skeleton, aşamalı durum mesajları, panoya kopyala, Türkçe hata mesajları
-- **Güvenli API kullanımı:** Groq anahtarı yalnızca sunucu tarafında; `/api/health` ile bağlantı testi
+- **Güvenli API kullanımı:** Groq anahtarı tarayıcıda saklanır, istek başına sunucuya iletilir; sunucuda kalıcı olarak tutulmaz. `/api/health` ile bağlantı testi
 
 ## Kurulum
 
@@ -27,11 +27,21 @@
 # Bağımlılıkları yükle
 npm install
 
-# Ortam değişkenlerini oluştur
-# Proje kökünde .env.local dosyası oluşturun:
+# Geliştirme sunucusunu başlat
+npm run dev
 ```
 
-`.env.local` içeriği:
+Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini açın.
+
+### API anahtarı
+
+İki yöntemden biri yeterlidir:
+
+**1. Uygulama içi (önerilen)**  
+İlk açılışta onboarding diyaloğu görünür. Groq API anahtarınızı girin ve **Kaydet**'e tıklayın. Anahtar yalnızca tarayıcınızda (`localStorage`) saklanır; her istekte sunucuya iletilir, sunucuda kaydedilmez.
+
+**2. Ortam değişkeni (isteğe bağlı, lokal geliştirme)**  
+Proje kökünde `.env.local` oluşturup anahtarı tanımlayabilirsiniz. UI'da anahtar girmeden de çalışır; header yoksa sunucu env değerine düşer.
 
 ```env
 GROQ_API_KEY=gsk_...
@@ -39,12 +49,7 @@ GROQ_API_KEY=gsk_...
 
 Anahtarınızı [Groq Console](https://console.groq.com/keys) üzerinden alabilirsiniz.
 
-```bash
-# Geliştirme sunucusunu başlat
-npm run dev
-```
-
-Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini açın. İlk açılışta API anahtarı yoksa onboarding diyaloğu görünür; anahtarı ekledikten sonra **Bağlantıyı Test Et** ile doğrulayın.
+Ayarlar simgesinden (Header) API anahtarını daha sonra da güncelleyebilirsiniz.
 
 ### Üretim derlemesi
 
@@ -56,7 +61,7 @@ npm start
 ## Kullanım Akışı
 
 1. Uygulamayı lokal ortamda açın (`npm run dev`).
-2. API anahtarı yoksa onboarding diyaloğunda `.env.local` yapılandırmasını tamamlayın ve bağlantıyı test edin.
+2. API anahtarı yoksa onboarding diyaloğunda Groq anahtarınızı girin ve **Kaydet** ile doğrulayın (veya `.env.local` ile yapılandırın).
 3. Kaynak makaleyi sol panele yapıştırın veya dosya yükleyin (veya **Örnek makale yükle**).
 4. Hedef platform kartını seçin.
 5. İsteğe bağlı olarak **Gelişmiş Ayarlar**'dan ton, hedef kitle ve uzunluk belirleyin.
@@ -72,8 +77,9 @@ npm start
 | State        | React useState + hooks               | Form, çıktı ve UI state yönetimi         |
 | Validation   | Zod                                  | API boundary ve form validasyonu         |
 | AI           | Groq SDK (`groq-sdk`)                | `llama-3.3-70b-versatile`, streaming     |
-| Storage      | React state (MVP)                    | Aktif dönüşüm verisi                     |
-| Env          | `.env.local` → `GROQ_API_KEY`        | Server-side only                         |
+| Storage      | React state + localStorage           | Dönüşüm verisi; API anahtarı (tarayıcı)  |
+| Env          | `.env.local` → `GROQ_API_KEY`        | İsteğe bağlı lokal geliştirme fallback'i |
+| Toasts       | Sonner                               | Kopyalama bildirimleri                   |
 | Icons        | Lucide React                         | Stroke-based ikonlar                     |
 | Fonts        | Geist Sans + Geist Mono              | UI metni ve mono alanlar                 |
 
@@ -94,7 +100,7 @@ lib/
   validation/             # Zod şemaları
   constants/              # Platform metadata, örnek makale
   hooks/                  # useTransform, useClipboard, useHealthCheck
-  utils/                  # retry, sse, cn
+  utils/                  # retry, sse, cn, api-key-storage, resolve-groq-api-key
 types/
   transform.ts
 docs/

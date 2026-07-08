@@ -46,10 +46,10 @@ export function TransformButton({
         disabled={isDisabled}
         aria-label={isLoading ? "Dönüştürülüyor" : "İçeriği dönüştür"}
         className={cn(
-          "h-10 w-full rounded-lg bg-accent-primary text-sm font-medium text-white",
+          "h-10 w-full cursor-pointer rounded-lg bg-accent-primary text-sm font-medium text-white",
           "hover:bg-accent-hover",
           "focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base",
-          "disabled:opacity-50",
+          "disabled:cursor-not-allowed disabled:opacity-50",
         )}
       >
         {isLoading ? (
