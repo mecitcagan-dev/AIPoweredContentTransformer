@@ -8,7 +8,7 @@ Update this file after every meaningful implementation change.
 
 ## Current Goal
 
-- `lib/hooks/useTransform.ts` + `useClipboard.ts`
+- `components/layout/` — Header, OnboardingDialog
 
 ## Completed
 
@@ -33,6 +33,7 @@ Update this file after every meaningful implementation change.
 - `lib/validation/transform-schema.ts` — `transformRequestSchema` + `TransformRequestInput` (Türkçe hata mesajları, `PLATFORM_IDS`/`TONES`/`LENGTHS` tek kaynak)
 - `app/api/health/route.ts` — GET health check (`validateConfig()`, Türkçe hata mesajları, key sızmaz)
 - `app/api/transform/route.ts` + `lib/utils/sse.ts` — POST SSE streaming (validate → orchestrate → stream; ön-istek JSON hata, stream-ortası SSE error event)
+- `lib/hooks/useTransform.ts` + `useClipboard.ts` — SSE tüketimi, AbortController stream iptali, panoya kopyalama
 
 ## In Progress
 
@@ -42,14 +43,13 @@ Update this file after every meaningful implementation change.
 
 Implementation sırası (her adım uçtan uca doğrulanır):
 
-1. `lib/hooks/useTransform.ts` + `useClipboard.ts`
-2. `components/layout/` — Header, OnboardingDialog
-3. `components/transform/` — SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper
-4. `app/page.tsx` — ana ekran birleştirme
-5. Empty, loading, streaming, error, success state'leri
-6. `lib/constants/sample-article.ts` — built-in örnek makale (`project-overview.md` spec: Türkçe, 400–600 karakter, uzaktan çalışma konusu)
-7. README.md + `docs/prompt-explanation.md` + `samples/` (3 örnek çıktı)
-8. Demo hazırlığı ve `npm run build` doğrulama
+1. `components/layout/` — Header, OnboardingDialog
+2. `components/transform/` — SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper
+3. `app/page.tsx` — ana ekran birleştirme
+4. Empty, loading, streaming, error, success state'leri
+5. `lib/constants/sample-article.ts` — built-in örnek makale (`project-overview.md` spec: Türkçe, 400–600 karakter, uzaktan çalışma konusu)
+6. README.md + `docs/prompt-explanation.md` + `samples/` (3 örnek çıktı)
+7. Demo hazırlığı ve `npm run build` doğrulama
 
 ## Open Questions
 
