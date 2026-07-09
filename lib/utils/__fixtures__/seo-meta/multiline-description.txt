@@ -1,0 +1,3 @@
+BAŞLIK: Uzaktan Çalışmada Verimlilik
+AÇIKLAMA: Uzaktan çalışma kalıcı bir modele dönüştü.
+Verimlilik için güven, net hedefler ve düzenli geri bildirim kritik.

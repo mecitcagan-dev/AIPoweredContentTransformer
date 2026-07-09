@@ -22,6 +22,12 @@ const LENGTH_INSTRUCTIONS: Record<Length, string> = {
   Uzun: "Platform limitine yakın, detaylı",
 };
 
+const SEO_META_LENGTH_INSTRUCTIONS: Record<Length, string> = {
+  Kısa: "Başlık en fazla ~25 karakter, açıklama en fazla ~60 karakter",
+  Orta: "Başlık en fazla ~45 karakter, açıklama en fazla ~110 karakter",
+  Uzun: "Başlık en fazla 60 karakter, açıklama en fazla 155 karakter",
+};
+
 export interface PromptMessage {
   role: "system" | "user";
   content: string;
@@ -37,21 +43,28 @@ function mapLengthToPrompt(length: Length): string {
   return LENGTH_INSTRUCTIONS[length];
 }
 
+/** SEO meta section için çift limit uzunluk talimatı. */
+function mapSeoMetaLengthToPrompt(length: Length): string {
+  return SEO_META_LENGTH_INSTRUCTIONS[length];
+}
+
 /** Kullanıcı prompt metnini oluşturur. */
 export function buildUserPrompt(
   source: string,
   tone: Tone,
   audience: string | undefined,
   length: Length,
+  lengthInstruction?: string,
 ): string {
   const resolvedAudience =
     audience && audience.trim().length > 0 ? audience.trim() : "Genel okuyucu";
+  const resolvedLength = lengthInstruction ?? mapLengthToPrompt(length);
 
   return `Aşağıdaki kaynak içeriği belirtilen formata dönüştür.
 
 Ton: ${mapToneToPrompt(tone)}
 Hedef kitle: ${resolvedAudience}
-Uzunluk: ${mapLengthToPrompt(length)}
+Uzunluk: ${resolvedLength}
 
 --- KAYNAK İÇERİK ---
 ${source}
@@ -86,6 +99,9 @@ export function buildBundleSectionMessages(
 ): PromptMessage[] {
   const sectionPrompt = getBundleSectionPrompt(section);
 
+  const lengthInstruction =
+    section === "seo-meta" ? mapSeoMetaLengthToPrompt(base.length) : undefined;
+
   return [
     {
       role: "system",
@@ -98,6 +114,7 @@ export function buildBundleSectionMessages(
         base.tone,
         base.audience,
         base.length,
+        lengthInstruction,
       ),
     },
   ];

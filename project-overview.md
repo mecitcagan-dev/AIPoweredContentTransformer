@@ -67,7 +67,7 @@ Empty state demosu için yerleşik örnek makale aşağıdaki spec'e uyar:
 | Amaç | Kısa, temsili içerik; FTUE ve demo akışında hızlı deneme |
 | Uyarı eşiği | 4000+ karakter uyarı banner'ını **tetiklemez** |
 
-**Platform Dönüşümü (8 format)**
+**Platform Dönüşümü (9 format)**
 - LinkedIn Post
 - X (Twitter) Thread
 - Instagram Caption
@@ -76,6 +76,7 @@ Empty state demosu için yerleşik örnek makale aşağıdaki spec'e uyar:
 - E-posta Taslağı
 - Kısa Özet
 - Madde Özet
+- Blog Yazısı *(Bundle Mode'a dahil değil; yalnızca Gelişmiş: Tek Platform Seç modunda)*
 
 **Dönüşüm Ayarları**
 - Ton: Profesyonel, Samimi, İkna Edici
@@ -84,7 +85,8 @@ Empty state demosu için yerleşik örnek makale aşağıdaki spec'e uyar:
 
 **Çıktı Deneyimi**
 - Server-Sent Events (SSE) ile streaming AI yanıtı
-- Platform badge ve karakter sayacı
+- Platform badge ve karakter sayacı (X Thread: en uzun tweet/tweet limiti; diğer platformlar: toplam/limit)
+- Bundle SEO: section tamamlandığında parse + normalize (60/155 karakter)
 - Panoya kopyala + başarı toast'u
 - Loading skeleton ve aşamalı durum mesajları
 

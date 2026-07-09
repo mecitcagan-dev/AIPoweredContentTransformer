@@ -1,6 +1,7 @@
 import type { BundleSectionId } from "@/lib/ai/types";
 import { PLATFORM_IDS, type PlatformId } from "@/lib/constants/platforms";
 
+import { BLOG_PROMPT } from "./blog";
 import { BULLET_SUMMARY_PROMPT } from "./bullet-summary";
 import { EMAIL_DRAFT_PROMPT } from "./email-draft";
 import { FACEBOOK_PROMPT } from "./facebook";
@@ -22,6 +23,7 @@ export const PLATFORM_PROMPTS = {
   [PLATFORM_IDS.EMAIL_DRAFT]: EMAIL_DRAFT_PROMPT,
   [PLATFORM_IDS.SHORT_SUMMARY]: SHORT_SUMMARY_PROMPT,
   [PLATFORM_IDS.BULLET_SUMMARY]: BULLET_SUMMARY_PROMPT,
+  [PLATFORM_IDS.BLOG]: BLOG_PROMPT,
 } as const satisfies Record<PlatformId, string>;
 
 /** Platform prompt metnini id ile döndürür. */

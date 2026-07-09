@@ -7,6 +7,7 @@ import {
   Mail,
   MessageCircle,
   Newspaper,
+  PenLine,
   Share2,
   Text,
   type LucideIcon,
@@ -35,6 +36,7 @@ const PLATFORM_ICONS: Record<PlatformIconName, LucideIcon> = {
   Mail,
   Text,
   List,
+  PenLine,
 };
 
 export interface PlatformSelectorProps {

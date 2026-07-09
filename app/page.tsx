@@ -247,6 +247,7 @@ export default function HomePage() {
                 output={output}
                 error={singleError}
                 platformLabel={platformLabel}
+                platformId={platform ?? undefined}
                 onRetry={handleRetry}
                 onCopySuccess={handleCopySuccess}
               />

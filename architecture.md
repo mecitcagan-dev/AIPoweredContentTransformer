@@ -132,6 +132,7 @@ lib/
       email-draft.ts
       short-summary.ts
       bullet-summary.ts
+      blog.ts
   validation/
     transform-schema.ts
   constants/
@@ -143,6 +144,11 @@ lib/
   utils/
     retry.ts
     sse.ts
+    parse-seo-meta.ts
+    normalize-seo-meta.ts
+    parse-twitter-thread.ts
+    output-character-stats.ts
+    __fixtures__/              # Parser doğrulama fixture'ları (manuel/script)
 types/
   transform.ts
 ```
@@ -202,6 +208,7 @@ app/api/ → lib/ai/, lib/validation/
 9. **Yeni transform isteği önceki stream'i iptal eder** — Yeni dönüştürme başladığında client tarafında `AbortController` ile önceki fetch/SSE iptal edilir; kısmi çıktı temizlenir (`useTransform` hook'u).
 10. **Bundle SSE event'leri single parser'ı kırmaz** — Bundle modu `section_start` / `section_end` ve `{ section, content }` chunk payload'ları kullanır; mevcut single-mode `encodeChunkEvent` ve `useTransform` parser'ı değişmez (geriye uyumlu).
 11. **Bundle modunda yalnızca bir aktif stream** — Yeni bundle isteği başladığında önceki `AbortController` abort edilir; tüm section state'leri (`BundleOutput.sections`) sıfırlanır (`useTransformBundle` hook'u).
+12. **Bundle SEO normalize yalnızca section tamamlandığında** — `normalizeSeoMeta` yalnızca `section_end` (seo-meta) sonrası çalışır; streaming sırasında ham parse çıktısı gösterilir, kısmi metin kesilmez.
 
 ## Architecture Decisions (cloud-deploy)
 

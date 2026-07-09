@@ -9,4 +9,12 @@ Format kuralları:
 - Son tweet'te CTA veya özet cümle olsun.
 - Hashtag'leri yalnızca son tweet'te kullan (en fazla 2).
 - Emoji kullanımı tweet başına en fazla 1.
-- 280 karakter limitini kesinlikle aşma; her tweet'i say.`;
+- Her tweet en fazla 280 karakter olmalı; tweet başına yaklaşık 2-4 cümle hedefle.
+- 280 karakter limitini kesinlikle aşma.
+
+Örnek format (her tweet ≤280 karakter):
+1/ Uzaktan çalışma artık geçici değil — kalıcı bir iş modeli. Verimlilik gerçekten artıyor mu?
+
+2/ Güven, net hedefler ve düzenli geri bildirim asıl belirleyiciler. Araç seçimi tek başına yeterli değil.
+
+3/ Başarılı ekipler esnek saatleri toplantılarla dengeliyor. Sizin deneyiminiz nasıl? #UzaktanÇalışma`;

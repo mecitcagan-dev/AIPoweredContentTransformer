@@ -112,7 +112,15 @@ Format kuralları:
 - Son tweet'te CTA veya özet cümle olsun.
 - Hashtag'leri yalnızca son tweet'te kullan (en fazla 2).
 - Emoji kullanımı tweet başına en fazla 1.
-- 280 karakter limitini kesinlikle aşma; her tweet'i say.
+- Her tweet en fazla 280 karakter olmalı; tweet başına yaklaşık 2-4 cümle hedefle.
+- 280 karakter limitini kesinlikle aşma.
+
+Örnek format (her tweet ≤280 karakter):
+1/ Uzaktan çalışma artık geçici değil — kalıcı bir iş modeli. Verimlilik gerçekten artıyor mu?
+
+2/ Güven, net hedefler ve düzenli geri bildirim asıl belirleyiciler. Araç seçimi tek başına yeterli değil.
+
+3/ Başarılı ekipler esnek saatleri toplantılarla dengeliyor. Sizin deneyiminiz nasıl? #UzaktanÇalışma
 ```
 
 ### Instagram Caption (`instagram.ts`)
@@ -207,6 +215,23 @@ Format kuralları:
 - Giriş veya kapanış cümlesi ekleme; yalnızca madde listesi.
 ```
 
+### Blog Yazısı (`blog.ts`)
+
+```
+Platform: Blog Yazısı
+Karakter limiti: Maksimum 6000 karakter (uzunluk ayarına göre değişir)
+
+Format kuralları:
+- Başlık ile başla (tek satır, dikkat çekici, # ile işaretle)
+- Giriş paragrafı: konuyu tanıt, okuyucunun neden okumaya devam etmesi gerektiğini belirt (2-4 cümle)
+- Gövdeyi 2-5 alt başlıklı bölüme ayır (## ile işaretle)
+- Her bölüm 2-4 paragraftan oluşsun
+- Sonuç paragrafında ana mesajı özetle ve bir CTA ekle
+- Kaynak metindeki temaya sadık, doğal anahtar kelime kullanımı
+- Markdown formatı kullan (bu platforma özgü izin)
+- Uydurma istatistik, alıntı veya kaynak ekleme
+```
+
 ## Bundle Mode (SEO + Sosyal Medya Paketi)
 
 Varsayılan mod: tek makale girdisi → sıralı 4 Groq çağrısı → etiketli çıktılar (SEO meta + LinkedIn + X Thread + Instagram).
@@ -217,7 +242,7 @@ Varsayılan mod: tek makale girdisi → sıralı 4 Groq çağrısı → etiketli
 
 **Prompt stratejisi:** 4 ayrı çağrı; her biri `buildBundleSectionMessages(section, base)` ile oluşturulur. Mevcut platform prompt dosyaları (`linkedin.ts`, `twitter-thread.ts`, `instagram.ts`) **birleştirilmez**, olduğu gibi kullanılır.
 
-**SEO meta tek çağrı:** `seo-meta` section çıktısı etiketli iki alan üretir; UI `BAŞLIK:` / `AÇIKLAMA:` prefix'leri ile parse eder.
+**SEO meta tek çağrı:** `seo-meta` section çıktısı etiketli iki alan üretir; UI `BAŞLIK:` / `AÇIKLAMA:` prefix'leri ile parse eder. Section `complete` olduğunda `parseSeoMeta` → `normalizeSeoMeta` (60/155 kelime sınırında kısaltma) uygulanır; streaming sırasında normalize çalışmaz.
 
 ### SEO Meta (`seo-meta.ts`)
 
@@ -227,10 +252,19 @@ Karakter limiti: Başlık maksimum 60 karakter, açıklama maksimum 155 karakter
 
 Format kuralları:
 - Yalnızca iki satır üret; başka içerik ekleme.
-- İlk satır: BAŞLIK: (maksimum 60 karakter, kaynak içeriği özetleyen SEO başlığı)
-- İkinci satır: AÇIKLAMA: (maksimum 155 karakter, kaynak içeriği özetleyen meta açıklama)
+- İlk satır: BAŞLIK: (en fazla 8-10 kelime, maksimum 60 karakter — aşarsan çıktı geçersiz sayılır)
+- İkinci satır: AÇIKLAMA: (en fazla 20-25 kelime, maksimum 155 karakter)
+- Başlık ve açıklamayı ayrı satırlarda üret; tek satırda birleştirme.
 - Açıklama, meta yorum veya "İşte SEO meta:" gibi ön ekler ekleme.
+
+Örnek çıktı (format ve uzunluk referansı):
+BAŞLIK: Uzaktan Çalışmada Verimlilik: Güven ve Net Hedefler
+AÇIKLAMA: Uzaktan çalışma kalıcı bir modele dönüştü. Verimlilik için güven, net hedefler ve düzenli geri bildirim kritik. Esnek saat dengesi.
 ```
+
+**SEO meta uzunluk override:** `buildBundleSectionMessages("seo-meta", …)` çağrısında genel `Uzunluk: Platform limitine yakın` yerine çift limit talimatı kullanılır (Kısa/Orta/Uzun → başlık/açıklama karakter hedefleri).
+
+**X Thread sayaç semantiği:** `characterLimit: 280` tweet başına geçerlidir (`characterLimitMode: per_segment`). UI toplam thread uzunluğunu 280 ile kıyaslamaz; en uzun tweet uzunluğu gösterilir.
 
 **Bundle SSE event'leri:** `section_start`, chunk (`{ section, content }`), `section_end`, `error`, `done` — mevcut single-mode `encodeChunkEvent` dokunulmaz.
 
@@ -268,6 +302,7 @@ NPM paketi: `groq-sdk` (import: `import Groq from "groq-sdk"`).
 | E-posta Taslağı | 512 |
 | Kısa Özet | 256 |
 | Madde Özet | 384 |
+| Blog Yazısı | 2048 |
 
 **Ön-istek retry politikası** (stream başlamadan önce):
 

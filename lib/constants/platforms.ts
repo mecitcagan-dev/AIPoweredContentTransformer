@@ -7,9 +7,16 @@ export const PLATFORM_IDS = {
   EMAIL_DRAFT: "email-draft",
   SHORT_SUMMARY: "short-summary",
   BULLET_SUMMARY: "bullet-summary",
+  BLOG: "blog",
 } as const;
 
 export type PlatformId = (typeof PLATFORM_IDS)[keyof typeof PLATFORM_IDS];
+
+/** X Thread: characterLimit tweet başına geçerlidir; toplam thread uzunluğu değil. */
+export const THREAD_PER_TWEET_LIMIT = 280;
+
+/** Karakter limitinin nasıl yorumlanacağını belirler. */
+export type CharacterLimitMode = "total" | "per_segment";
 
 /** Lucide React icon adları (brand ikonları pakette yok; semantik eşleme). */
 export type PlatformIconName =
@@ -20,13 +27,16 @@ export type PlatformIconName =
   | "Newspaper"
   | "Mail"
   | "Text"
-  | "List";
+  | "List"
+  | "PenLine";
 
 export interface PlatformMetadata {
   id: PlatformId;
   label: string;
   icon: PlatformIconName;
   characterLimit: number;
+  /** Varsayılan: total. X Thread gibi çok parçalı formatlarda per_segment. */
+  characterLimitMode?: CharacterLimitMode;
   description: string;
 }
 
@@ -42,7 +52,8 @@ export const PLATFORMS: readonly PlatformMetadata[] = [
     id: PLATFORM_IDS.TWITTER_THREAD,
     label: "X Thread",
     icon: "MessageCircle",
-    characterLimit: 280,
+    characterLimit: THREAD_PER_TWEET_LIMIT,
+    characterLimitMode: "per_segment",
     description: "Max 280 karakter/tweet, 3–7 tweet thread, hook + CTA",
   },
   {
@@ -86,6 +97,13 @@ export const PLATFORMS: readonly PlatformMetadata[] = [
     icon: "List",
     characterLimit: 500,
     description: "Max 500 karakter, 5–7 madde listesi",
+  },
+  {
+    id: PLATFORM_IDS.BLOG,
+    label: "Blog Yazısı",
+    icon: "PenLine",
+    characterLimit: 6000,
+    description: "Max 6000 karakter, başlık + alt başlıklar + CTA",
   },
 ] as const;
 

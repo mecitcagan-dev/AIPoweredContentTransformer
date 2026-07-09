@@ -9,6 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClipboard } from "@/lib/hooks/useClipboard";
 import type { TransformState } from "@/lib/hooks/useTransform";
+import {
+  PLATFORM_BY_ID,
+  type PlatformId,
+} from "@/lib/constants/platforms";
+import {
+  getCharacterDisplayStats,
+  getCounterToneClassName,
+} from "@/lib/utils/output-character-stats";
 import { cn } from "@/lib/utils";
 
 const LOADING_MESSAGES = [
@@ -22,6 +30,7 @@ export interface OutputPanelProps {
   output: string;
   error: string | null;
   platformLabel?: string;
+  platformId?: PlatformId;
   onRetry?: () => void;
   onCopySuccess?: () => void;
 }
@@ -49,6 +58,7 @@ export function OutputPanel({
   output,
   error,
   platformLabel,
+  platformId,
   onRetry,
   onCopySuccess,
 }: OutputPanelProps) {
@@ -112,6 +122,15 @@ export function OutputPanel({
     onCopySuccess?.();
   };
 
+  const platformMeta = platformId ? PLATFORM_BY_ID[platformId] : undefined;
+  const displayStats = getCharacterDisplayStats({
+    content: output,
+    title: platformLabel ?? "Çıktı",
+    platformId,
+    characterLimit: platformMeta?.characterLimit,
+    limitMode: platformMeta?.characterLimitMode,
+  });
+
   return (
     <section className="flex h-full flex-col gap-3 bg-bg-surface p-4 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -124,10 +143,26 @@ export function OutputPanel({
           )}
         </div>
 
-        <p className="text-xs text-text-muted">
-          {output.length} karakter
-        </p>
+        <div className="text-right">
+          <p
+            className={cn(
+              "text-xs",
+              getCounterToneClassName(displayStats.counterTone),
+            )}
+          >
+            {displayStats.counterText}
+          </p>
+          {displayStats.secondaryText && (
+            <p className="text-xs text-text-muted">{displayStats.secondaryText}</p>
+          )}
+        </div>
       </div>
+
+      {displayStats.limitWarning && (
+        <p className="text-xs text-state-warning" role="status">
+          {displayStats.limitWarning}
+        </p>
+      )}
 
       <div
         ref={outputRef}

@@ -17,6 +17,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PLATFORM_BY_ID, PLATFORM_IDS } from "@/lib/constants/platforms";
 import { useClipboard } from "@/lib/hooks/useClipboard";
+import {
+  SEO_DESCRIPTION_MAX,
+  SEO_TITLE_MAX,
+} from "@/lib/utils/normalize-seo-meta";
+import {
+  getCharacterDisplayStats,
+  getCounterToneClassName,
+} from "@/lib/utils/output-character-stats";
 import { parseSeoMeta } from "@/lib/utils/parse-seo-meta";
 import { cn } from "@/lib/utils";
 import type {
@@ -24,54 +32,6 @@ import type {
   BundleSectionStatus,
   BundleTransformState,
 } from "@/types/transform";
-
-const SEO_TITLE_LIMIT = 60;
-const SEO_DESCRIPTION_LIMIT = 155;
-const COUNTER_WARNING_RATIO = 0.9;
-
-type CharacterCounterTone = "neutral" | "warning" | "error";
-
-function getCharacterCounterTone(
-  length: number,
-  limit?: number,
-): CharacterCounterTone {
-  if (!limit) {
-    return "neutral";
-  }
-
-  if (length > limit) {
-    return "error";
-  }
-
-  if (length >= limit * COUNTER_WARNING_RATIO) {
-    return "warning";
-  }
-
-  return "neutral";
-}
-
-function getCharacterCounterClassName(tone: CharacterCounterTone): string {
-  switch (tone) {
-    case "error":
-      return "text-state-error";
-    case "warning":
-      return "text-state-warning";
-    default:
-      return "text-state-success";
-  }
-}
-
-function getLimitWarningMessage(
-  title: string,
-  length: number,
-  limit?: number,
-): string | null {
-  if (!limit || length <= limit) {
-    return null;
-  }
-
-  return `Önerilen limit aşıldı (${limit} karakter) — ${title}`;
-}
 
 function formatBundleMarkdown(output: BundleOutput): string {
   return [
@@ -120,6 +80,8 @@ interface BundleCardConfig {
   getContent: (output: BundleOutput) => string;
   getStatus: (output: BundleOutput) => BundleSectionStatus;
   characterLimit?: number;
+  platformId?: (typeof PLATFORM_IDS)[keyof typeof PLATFORM_IDS];
+  getParseWarning?: (output: BundleOutput) => string | null;
 }
 
 const BUNDLE_CARDS: BundleCardConfig[] = [
@@ -134,7 +96,7 @@ const BUNDLE_CARDS: BundleCardConfig[] = [
       return parseSeoMeta(section.content).title;
     },
     getStatus: (output) => output.sections["seo-meta"].status,
-    characterLimit: SEO_TITLE_LIMIT,
+    characterLimit: SEO_TITLE_MAX,
   },
   {
     id: "seo-description",
@@ -147,7 +109,19 @@ const BUNDLE_CARDS: BundleCardConfig[] = [
       return parseSeoMeta(section.content).description;
     },
     getStatus: (output) => output.sections["seo-meta"].status,
-    characterLimit: SEO_DESCRIPTION_LIMIT,
+    characterLimit: SEO_DESCRIPTION_MAX,
+    getParseWarning: (output) => {
+      const section = output.sections["seo-meta"];
+      if (section.status !== "complete") {
+        return null;
+      }
+
+      if (output.seoDescription.trim().length > 0) {
+        return null;
+      }
+
+      return "Açıklama ayrıştırılamadı";
+    },
   },
   {
     id: "linkedin",
@@ -155,6 +129,7 @@ const BUNDLE_CARDS: BundleCardConfig[] = [
     getContent: (output) => output.sections.linkedin.content,
     getStatus: (output) => output.sections.linkedin.status,
     characterLimit: PLATFORM_BY_ID[PLATFORM_IDS.LINKEDIN].characterLimit,
+    platformId: PLATFORM_IDS.LINKEDIN,
   },
   {
     id: "twitter-thread",
@@ -162,6 +137,7 @@ const BUNDLE_CARDS: BundleCardConfig[] = [
     getContent: (output) => output.sections["twitter-thread"].content,
     getStatus: (output) => output.sections["twitter-thread"].status,
     characterLimit: PLATFORM_BY_ID[PLATFORM_IDS.TWITTER_THREAD].characterLimit,
+    platformId: PLATFORM_IDS.TWITTER_THREAD,
   },
   {
     id: "instagram",
@@ -169,6 +145,7 @@ const BUNDLE_CARDS: BundleCardConfig[] = [
     getContent: (output) => output.sections.instagram.content,
     getStatus: (output) => output.sections.instagram.status,
     characterLimit: PLATFORM_BY_ID[PLATFORM_IDS.INSTAGRAM].characterLimit,
+    platformId: PLATFORM_IDS.INSTAGRAM,
   },
 ];
 
@@ -195,6 +172,8 @@ interface BundleOutputCardProps {
   content: string;
   status: BundleSectionStatus;
   characterLimit?: number;
+  platformId?: (typeof PLATFORM_IDS)[keyof typeof PLATFORM_IDS];
+  parseWarning?: string | null;
   isGlobalLoading: boolean;
   isGlobalIdle: boolean;
   isActive: boolean;
@@ -209,6 +188,8 @@ function BundleOutputCard({
   content,
   status,
   characterLimit,
+  platformId,
+  parseWarning,
   isGlobalLoading,
   isGlobalIdle,
   isActive,
@@ -235,12 +216,14 @@ function BundleOutputCard({
     onCopySuccess?.();
   };
 
-  const counterTone = getCharacterCounterTone(content.length, characterLimit);
-  const limitWarning = getLimitWarningMessage(
+  const displayStats = getCharacterDisplayStats({
+    content,
     title,
-    content.length,
+    platformId,
     characterLimit,
-  );
+    limitMode:
+      platformId === PLATFORM_IDS.TWITTER_THREAD ? "per_segment" : "total",
+  });
 
   return (
     <Card
@@ -269,21 +252,31 @@ function BundleOutputCard({
             </Badge>
           )}
         </div>
-        <p
-          className={cn(
-            "text-xs",
-            getCharacterCounterClassName(counterTone),
+        <div className="text-right">
+          <p
+            className={cn(
+              "text-xs",
+              getCounterToneClassName(displayStats.counterTone),
+            )}
+          >
+            {displayStats.counterText}
+          </p>
+          {displayStats.secondaryText && (
+            <p className="text-xs text-text-muted">{displayStats.secondaryText}</p>
           )}
-        >
-          {content.length}
-          {characterLimit ? `/${characterLimit}` : ""} karakter
-        </p>
+        </div>
       </CardHeader>
 
       <CardContent className="space-y-3">
-        {limitWarning && (
+        {displayStats.limitWarning && (
           <p className="text-xs text-state-warning" role="status">
-            {limitWarning}
+            {displayStats.limitWarning}
+          </p>
+        )}
+
+        {parseWarning && (
+          <p className="text-xs text-state-error" role="status">
+            {parseWarning}
           </p>
         )}
 
@@ -463,6 +456,7 @@ export function BundleOutputPanel({
           BUNDLE_CARDS.map((card) => {
             const status = card.getStatus(bundleOutput);
             const content = card.getContent(bundleOutput);
+            const parseWarning = card.getParseWarning?.(bundleOutput) ?? null;
             const isActive =
               bundleOutput.activeSection !== null &&
               ((card.id.startsWith("seo-") &&
@@ -482,6 +476,8 @@ export function BundleOutputPanel({
                   content={content}
                   status={status}
                   characterLimit={card.characterLimit}
+                  platformId={card.platformId}
+                  parseWarning={parseWarning}
                   isGlobalLoading={isGlobalLoading}
                   isGlobalIdle={isGlobalIdle}
                   isActive={isActive}

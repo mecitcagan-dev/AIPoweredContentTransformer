@@ -5,6 +5,7 @@ import { useCallback, useRef, useState } from "react";
 import { BUNDLE_SECTIONS, type BundleSectionId } from "@/lib/ai/types";
 import type { TransformBundleRequestInput } from "@/lib/validation/transform-schema";
 import { getGroqApiKeyHeaders } from "@/lib/utils/api-key-storage";
+import { normalizeSeoMeta } from "@/lib/utils/normalize-seo-meta";
 import { parseSeoMeta } from "@/lib/utils/parse-seo-meta";
 import type {
   SseErrorPayload,
@@ -208,11 +209,12 @@ function applySectionEnd(
   }
 
   const parsed = parseSeoMeta(sectionContent);
+  const normalized = normalizeSeoMeta(parsed, sectionContent);
 
   return {
     ...nextOutput,
-    seoTitle: parsed.title,
-    seoDescription: parsed.description,
+    seoTitle: normalized.title,
+    seoDescription: normalized.description,
   };
 }
 

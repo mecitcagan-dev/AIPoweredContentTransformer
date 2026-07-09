@@ -109,7 +109,7 @@ Lucide React. Stroke-based ikonlar only.
 | ------------------- | ------------- | -------------------------------- |
 | Inline / label      | `h-4 w-4`     | FileText, Settings, Copy         |
 | Button              | `h-4 w-4`     | ArrowRight, RefreshCw, Upload    |
-| Platform kartları   | `h-5 w-5`     | Linkedin, Twitter, Instagram     |
+| Platform kartları   | `h-5 w-5`     | Briefcase, MessageCircle, PenLine |
 | Empty state         | `h-12 w-12`   | Sparkles, FileQuestion           |
 
 ## User Journey
@@ -185,8 +185,10 @@ Bundle modu çıktı paneli 5 kart + üstte `BundleProgressBar` içerir: **SEO B
 
 | Kart | Kaynak | Sayaç |
 | ---- | ------ | ----- |
-| SEO Başlık | `bundleOutput.seoTitle` (complete) veya `parseSeoMeta(seo-meta content).title` (streaming) | `X/60` |
-| Meta Açıklama | `bundleOutput.seoDescription` (complete) veya parse fallback (streaming) | `X/155` |
+| SEO Başlık | `bundleOutput.seoTitle` (complete, normalize edilmiş) veya `parseSeoMeta(seo-meta content).title` (streaming) | `X/60` |
+| Meta Açıklama | `bundleOutput.seoDescription` (complete, normalize edilmiş) veya parse fallback (streaming) | `X/155` |
+
+Boş açıklama (complete): "Açıklama ayrıştırılamadı" uyarısı.
 
 Her iki kartın section durumu `bundleOutput.sections["seo-meta"].status` ile senkron kalır.
 
@@ -194,9 +196,9 @@ Her iki kartın section durumu `bundleOutput.sections["seo-meta"].status` ile se
 
 | Kart | Section id | Sayaç |
 | ---- | ---------- | ----- |
-| LinkedIn Post | `linkedin` | Platform limiti (`platforms.ts`) |
-| X Thread | `twitter-thread` | Platform limiti |
-| Instagram Caption | `instagram` | Platform limiti |
+| LinkedIn Post | `linkedin` | Toplam karakter / platform limiti |
+| X Thread | `twitter-thread` | En uzun tweet / 280 + `N tweet · X karakter toplam` (toplam 280 ile kıyaslanmaz) |
+| Instagram Caption | `instagram` | Toplam karakter / platform limiti |
 
 #### BundleProgressBar (4 aşama)
 
@@ -281,7 +283,8 @@ Ton, hedef kitle ve uzunluk varsayılan değerlerle gelir (Profesyonel, Genel, O
 
 ## Tooltips
 
-- Platform kartları: Hover'da format ipucu (ör. "Max 3000 karakter, hook + CTA + hashtag")
+- Platform kartları: Hover'da format ipucu (ör. "Max 3000 karakter, hook + CTA + hashtag"; Blog: "Max 6000 karakter, başlık + alt başlıklar + CTA")
+- X Thread (tek-platform ve bundle): Sayaç en uzun tweet / 280; toplam karakter ikincil bilgi
 - Dosya yükle: "TXT veya MD dosyası yükleyin"
 - Ayarlar ikonu: "API anahtarı yapılandırması"
 - Karakter sayacı (çıktı): Platform limitine göre renk (yeşil → sarı → kırmızı)

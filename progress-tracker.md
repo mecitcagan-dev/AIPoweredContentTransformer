@@ -106,6 +106,8 @@ Update this file after every meaningful implementation change.
 - `components/transform/` tamamlandı — 6 component (SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper).
 - Teslim paketi tamamlandı: README, `docs/prompt-explanation.md`, `samples/` (3 örnek çıktı).
 - Bundle Mode 7 adımlık plan tamamlandı; `samples/04-bundle-package.md` ve güncellenmiş teslim dokümantasyonu eklendi.
+- Blog Yazısı platformu eklendi (Gelişmiş mod, 9. platform, Bundle'a dahil değil).
+- Bundle çıktı kalitesi düzeltmesi: SEO parse/normalize (60/155), X Thread per-tweet sayaç, OutputPanel paritesi.
 
 ## Related Documents
 
