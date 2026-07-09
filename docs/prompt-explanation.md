@@ -85,11 +85,55 @@ Bu kural kritiktir çünkü:
 
 Kural 1 açıkça yasaklar: *"Uydurma bilgi, istatistik veya alıntı ekleme."* Kural 7 ise çıktıyı temiz tutar: meta açıklama veya *"İşte dönüştürülmüş içerik:"* gibi ön ekler üretilmez.
 
+## Bundle Mode: Sıralı 4 Çağrı Stratejisi
+
+Staj görevinin çekirdek gereksinimi tek makale girdisinden **SEO meta + üç sosyal kanal** çıktısı üretmektir. Bundle modu bunu `POST /api/transform/bundle` üzerinden, `TransformOrchestrator.transformBundle()` ile **sıralı dört ayrı Groq çağrısı** olarak uygular.
+
+### Neden paralel değil, sıralı?
+
+| Yaklaşım | Artı | Eksi |
+| -------- | ---- | ---- |
+| Tek monolitik prompt | Tek API çağrısı | Format karışması; SEO + LinkedIn + X + Instagram kuralları çakışır; parse güvenilmez |
+| 4 paralel çağrı | Daha hızlı teorik süre | 4× eşzamanlı rate limit riski; client birleştirme karmaşık |
+| **4 sıralı çağrı (seçilen)** | Her section kendi prompt'u; yapılandırılmış SSE (`section_start` / chunk / `section_end`); kısmi hata yönetimi | Toplam süre daha uzun |
+
+Sıralı model, her kanalın doğrulanmış prompt şablonunu ayrı uygulamasına izin verir; streaming UX her section için ayrı ilerleme göstergesi sunar.
+
+### SEO meta: neden etiketli iki satır?
+
+`seo-meta` bir `PlatformId` değildir; LinkedIn/X format kuralları burada işe yaramaz. `lib/ai/prompts/seo-meta.ts` yalnızca iki satır üretir:
+
+```
+BAŞLIK: ...
+AÇIKLAMA: ...
+```
+
+Bu tasarımın gerekçeleri:
+
+1. **Tek API çağrısı, iki UI kartı** — SEO başlık (≤60) ve meta açıklama (≤155) ayrı kartlarda gösterilir; ham çıktı `parseSeoMeta()` ile ayrıştırılır.
+2. **Deterministik parse** — Serbest metin yerine sabit prefix'ler (`BAŞLIK:`, `AÇIKLAMA:`) client tarafında güvenilir ayrışma sağlar.
+3. **Düşük token bütçesi** — `max_tokens: 256`, `temperature: 0.3`; yapılandırılmış kısa çıktı için yeterli.
+
+### Mevcut platform prompt'larının yeniden kullanımı
+
+Bundle'daki `linkedin`, `twitter-thread` ve `instagram` section'ları **mevcut prompt dosyalarını değiştirmeden** kullanır:
+
+```
+buildBundleSectionMessages(section, base)
+  → SYSTEM_PROMPT + getBundleSectionPrompt(section)
+  → buildUserPrompt(source, tone, audience, length)
+```
+
+`linkedin.ts`, `twitter-thread.ts` ve `instagram.ts` dosyalarına dokunulmaz; yalnızca `buildBundleSectionMessages()` bu dosyaları lookup ile çağırır. Single-platform modundaki `buildMessages()` akışı aynen korunur.
+
+Section sırası sabittir: `seo-meta` → `linkedin` → `twitter-thread` → `instagram` (`BUNDLE_SECTIONS`).
+
 ## İlgili Dosyalar
 
 - `lib/ai/prompts/system.ts` — System prompt
 - `lib/ai/prompts/index.ts` — Platform lookup (`PLATFORM_PROMPTS`)
 - `lib/ai/prompts/linkedin.ts`, `twitter-thread.ts`, … — Kanal şablonları
-- `lib/ai/prompt-engine.ts` — `buildUserPrompt()`, `buildMessages()`
+- `lib/ai/prompts/seo-meta.ts` — Bundle SEO meta şablonu
+- `lib/ai/prompt-engine.ts` — `buildUserPrompt()`, `buildMessages()`, `buildBundleSectionMessages()`
 - `lib/ai/providers/groq-provider.ts` — Streaming API çağrısı
 - `ai-workflow-rules.md` — SSOT prompt kuralları

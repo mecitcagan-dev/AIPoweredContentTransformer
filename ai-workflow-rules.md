@@ -207,6 +207,39 @@ Format kuralları:
 - Giriş veya kapanış cümlesi ekleme; yalnızca madde listesi.
 ```
 
+## Bundle Mode (SEO + Sosyal Medya Paketi)
+
+Varsayılan mod: tek makale girdisi → sıralı 4 Groq çağrısı → etiketli çıktılar (SEO meta + LinkedIn + X Thread + Instagram).
+
+**Section sırası (`BUNDLE_SECTIONS`):** `seo-meta` → `linkedin` → `twitter-thread` → `instagram`
+
+**`BundleSectionId` (daraltılmış union):** `"seo-meta" | "linkedin" | "twitter-thread" | "instagram"` — tüm `PlatformId` değil; bundle dışı platformlar derleme zamanında engellenir.
+
+**Prompt stratejisi:** 4 ayrı çağrı; her biri `buildBundleSectionMessages(section, base)` ile oluşturulur. Mevcut platform prompt dosyaları (`linkedin.ts`, `twitter-thread.ts`, `instagram.ts`) **birleştirilmez**, olduğu gibi kullanılır.
+
+**SEO meta tek çağrı:** `seo-meta` section çıktısı etiketli iki alan üretir; UI `BAŞLIK:` / `AÇIKLAMA:` prefix'leri ile parse eder.
+
+### SEO Meta (`seo-meta.ts`)
+
+```
+Platform: SEO Meta
+Karakter limiti: Başlık maksimum 60 karakter, açıklama maksimum 155 karakter
+
+Format kuralları:
+- Yalnızca iki satır üret; başka içerik ekleme.
+- İlk satır: BAŞLIK: (maksimum 60 karakter, kaynak içeriği özetleyen SEO başlığı)
+- İkinci satır: AÇIKLAMA: (maksimum 155 karakter, kaynak içeriği özetleyen meta açıklama)
+- Açıklama, meta yorum veya "İşte SEO meta:" gibi ön ekler ekleme.
+```
+
+**Bundle SSE event'leri:** `section_start`, chunk (`{ section, content }`), `section_end`, `error`, `done` — mevcut single-mode `encodeChunkEvent` dokunulmaz.
+
+**API route:** `POST /api/transform/bundle` — `bundleRequestSchema` ile validate; `TransformOrchestrator.transformBundle()` SSE stream döner.
+
+**Kısmi hata:** Section N'de hata → tamamlanan section içerikleri korunur; retry tüm bundle'ı sıfırdan başlatır (MVP).
+
+**Rate limit:** 1 bundle = 4 ardışık API çağrısı; her section ön-istek retry politikası bağımsız uygulanır (`lib/utils/retry.ts`). Section ortasında hata → SSE error, kısmi çıktı korunur.
+
 ## Groq Configuration
 
 NPM paketi: `groq-sdk` (import: `import Groq from "groq-sdk"`).
@@ -226,6 +259,7 @@ NPM paketi: `groq-sdk` (import: `import Groq from "groq-sdk"`).
 
 | Platform | max_tokens |
 |----------|------------|
+| SEO Meta (bundle) | 256 |
 | LinkedIn Post | 1024 |
 | X Thread | 1024 |
 | Instagram Caption | 768 |
@@ -263,6 +297,12 @@ NPM paketi: `groq-sdk` (import: `import Groq from "groq-sdk"`).
   2. Önceki kısmi çıktı temizlenir
   3. Yeni istek başlatılır
 - Aynı anda yalnızca bir aktif transform stream'i olabilir
+
+**Bundle stream iptali (invariant #11):**
+
+- Bundle modunda da yalnızca bir aktif `transformBundle` stream'i olabilir
+- Yeni bundle isteği başladığında client `AbortController` ile önceki fetch/SSE iptal eder; tüm `BundleOutput.sections` state'i sıfırlanır (`useTransformBundle` — Adım 3)
+- Kısmi hata durumunda tamamlanan section içerikleri korunur; "Tekrar Dene" tüm bundle'ı seo-meta'dan itibaren yeniden başlatır
 
 **Girdi limitleri:**
 

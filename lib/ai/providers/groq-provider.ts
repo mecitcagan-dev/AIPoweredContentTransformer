@@ -1,7 +1,15 @@
 import Groq from "groq-sdk";
 
-import { buildMessages } from "@/lib/ai/prompt-engine";
-import type { AIProvider, TransformRequest } from "@/lib/ai/types";
+import {
+  buildBundleSectionMessages,
+  buildMessages,
+  type PromptMessage,
+} from "@/lib/ai/prompt-engine";
+import type {
+  BundleCapableProvider,
+  BundleSectionId,
+  TransformRequest,
+} from "@/lib/ai/types";
 import { PLATFORM_IDS, type PlatformId } from "@/lib/constants/platforms";
 import { withRetry } from "@/lib/utils/retry";
 
@@ -18,6 +26,14 @@ const PLATFORM_MAX_TOKENS: Record<PlatformId, number> = {
   [PLATFORM_IDS.BULLET_SUMMARY]: 384,
 };
 
+const BUNDLE_SECTION_MAX_TOKENS: Record<BundleSectionId, number> = {
+  "seo-meta": 256,
+  [PLATFORM_IDS.LINKEDIN]: PLATFORM_MAX_TOKENS[PLATFORM_IDS.LINKEDIN],
+  [PLATFORM_IDS.TWITTER_THREAD]:
+    PLATFORM_MAX_TOKENS[PLATFORM_IDS.TWITTER_THREAD],
+  [PLATFORM_IDS.INSTAGRAM]: PLATFORM_MAX_TOKENS[PLATFORM_IDS.INSTAGRAM],
+};
+
 const SUMMARY_PLATFORMS = new Set<PlatformId>([
   PLATFORM_IDS.SHORT_SUMMARY,
   PLATFORM_IDS.BULLET_SUMMARY,
@@ -31,6 +47,18 @@ function getMaxTokens(platform: PlatformId): number {
   return PLATFORM_MAX_TOKENS[platform];
 }
 
+function getBundleSectionTemperature(section: BundleSectionId): number {
+  if (section === "seo-meta") {
+    return 0.3;
+  }
+
+  return getTemperature(section);
+}
+
+function getBundleSectionMaxTokens(section: BundleSectionId): number {
+  return BUNDLE_SECTION_MAX_TOKENS[section];
+}
+
 function isValidGroqApiKey(apiKey: string | undefined): boolean {
   if (!apiKey || apiKey.trim().length === 0) {
     return false;
@@ -39,7 +67,7 @@ function isValidGroqApiKey(apiKey: string | undefined): boolean {
   return /^gsk_[A-Za-z0-9]+$/.test(apiKey.trim());
 }
 
-export class GroqProvider implements AIProvider {
+export class GroqProvider implements BundleCapableProvider {
   readonly name = "groq";
 
   private readonly apiKey: string;
@@ -57,13 +85,35 @@ export class GroqProvider implements AIProvider {
   async *transform(request: TransformRequest): AsyncIterable<string> {
     const messages = buildMessages(request);
 
+    yield* this.streamMessages(messages, {
+      temperature: getTemperature(request.platform),
+      max_tokens: getMaxTokens(request.platform),
+    });
+  }
+
+  async *transformSection(
+    section: BundleSectionId,
+    base: Omit<TransformRequest, "platform">,
+  ): AsyncIterable<string> {
+    const messages = buildBundleSectionMessages(section, base);
+
+    yield* this.streamMessages(messages, {
+      temperature: getBundleSectionTemperature(section),
+      max_tokens: getBundleSectionMaxTokens(section),
+    });
+  }
+
+  private async *streamMessages(
+    messages: PromptMessage[],
+    options: { temperature: number; max_tokens: number },
+  ): AsyncIterable<string> {
     const stream = await withRetry(() =>
       this.client.chat.completions.create({
         model: GROQ_MODEL,
         messages,
         stream: true,
-        temperature: getTemperature(request.platform),
-        max_tokens: getMaxTokens(request.platform),
+        temperature: options.temperature,
+        max_tokens: options.max_tokens,
         top_p: 1,
         stop: null,
       }),

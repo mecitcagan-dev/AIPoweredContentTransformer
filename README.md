@@ -1,12 +1,25 @@
 # İçerik Dönüştürücü (Repack)
 
-**Mevcut içeriğinizi tek tıkla LinkedIn, X, Instagram ve daha fazlası için yeniden paketleyin.**
+**Mevcut içeriğinizi tek işlemde SEO meta + sosyal medya paketine dönüştürün.**
 
-İçerik Dönüştürücü, bir makale veya metni farklı yayın kanalları için AI destekli olarak yeniden formatlayan lokal bir web uygulamasıdır. Yeni içerik üretmek yerine kaynak metindeki mesajı koruyarak platform kurallarına uyarlar. Bu bir sohbet aracı değildir; yapılandırılmış bir dönüşüm iş akışı sunar.
+İçerik Dönüştürücü, bir makale veya metni farklı yayın kanalları için AI destekli olarak yeniden formatlayan bir web uygulamasıdır. Yeni içerik üretmek yerine kaynak metindeki mesajı koruyarak platform kurallarına uyarlar. Bu bir sohbet aracı değildir; yapılandırılmış bir dönüşüm iş akışı sunar.
 
 ## Özellikler
 
+### Varsayılan: SEO + Sosyal Medya Paketi (Bundle Mode)
+
+- **Tek işlemde 5 çıktı:** SEO başlık, meta açıklama, LinkedIn postu, X thread, Instagram caption
+- **4 aşamalı progress bar:** SEO → LinkedIn → X → Instagram (sıralı streaming)
+- **Paketi İndir (.md):** Tamamlanan paketi Markdown dosyası olarak indirme
+- **Karakter sayacı uyarıları:** Limit yaklaşımı ve aşımında görsel geri bildirim
+
+### Gelişmiş: Tek Platform Seç (bonus mod)
+
 - **8 platform formatı:** LinkedIn Post, X Thread, Instagram Caption, Facebook Post, Newsletter, E-posta Taslağı, Kısa Özet, Madde Özet
+- Tek seferde bir platform için özelleştirilmiş çıktı
+
+### Ortak
+
 - **Streaming çıktı:** Server-Sent Events (SSE) ile token-by-token AI yanıtı
 - **Kaynak girişi:** Metin yapıştırma, `.txt` / `.md` dosya yükleme, yerleşik örnek makale
 - **Dönüşüm ayarları:** Ton (Profesyonel / Samimi / İkna Edici), hedef kitle, uzunluk (Kısa / Orta / Uzun)
@@ -60,13 +73,21 @@ npm start
 
 ## Kullanım Akışı
 
-1. Uygulamayı lokal ortamda açın (`npm run dev`).
-2. API anahtarı yoksa onboarding diyaloğunda Groq anahtarınızı girin ve **Kaydet** ile doğrulayın (veya `.env.local` ile yapılandırın).
-3. Kaynak makaleyi sol panele yapıştırın veya dosya yükleyin (veya **Örnek makale yükle**).
-4. Hedef platform kartını seçin.
-5. İsteğe bağlı olarak **Gelişmiş Ayarlar**'dan ton, hedef kitle ve uzunluk belirleyin.
-6. **Dönüştür**'e tıklayın; çıktı sağ panelde streaming ile görünür.
-7. **Kopyala** ile panoya alın veya farklı bir platform için tekrar dönüştürün.
+### Bundle (varsayılan) — 2 tık
+
+1. Uygulamayı açın (`npm run dev` veya deploy URL).
+2. API anahtarı yoksa onboarding'de Groq anahtarınızı girin ve doğrulayın.
+3. Kaynak makaleyi sol panele yapıştırın veya dosya yükleyin (**Örnek makale yükle**).
+4. İsteğe bağlı **Gelişmiş Ayarlar**'dan ton, hedef kitle ve uzunluk belirleyin.
+5. **Dönüştür**'e tıklayın; sağ panelde 5 kartlı paket çıktısı streaming ile görünür.
+6. Kartları ayrı ayrı **Kopyala** veya tam paketi **Paketi İndir (.md)** ile alın.
+
+### Gelişmiş: Tek Platform Seç
+
+1. Üst mod seçiciden **Gelişmiş: Tek Platform Seç**'e geçin.
+2. Kaynak metni girin, hedef platform kartını seçin.
+3. İsteğe bağlı ayarları belirleyin ve **Dönüştür**'e tıklayın.
+4. Sağ panelde tek platform çıktısı streaming ile görünür; **Kopyala** ile panoya alın.
 
 ## Tech Stack
 
@@ -89,23 +110,24 @@ npm start
 app/
   layout.tsx, page.tsx, globals.css
   api/
-    transform/route.ts    # POST — SSE streaming dönüşüm
-    health/route.ts       # GET — API anahtarı doğrulama
+    transform/route.ts         # POST — single-platform SSE
+    transform/bundle/route.ts  # POST — bundle SSE (4 section)
+    health/route.ts            # GET — API anahtarı doğrulama
 components/
-  ui/                     # shadcn/ui (doğrudan değiştirilmez)
-  transform/              # SourcePanel, OutputPanel, PlatformSelector, ...
-  layout/                 # Header, OnboardingDialog
+  ui/                          # shadcn/ui (doğrudan değiştirilmez)
+  transform/                   # SourcePanel, BundleOutputPanel, TransformModeSelector, ...
+  layout/                      # Header, OnboardingDialog
 lib/
-  ai/                     # Provider abstraction, prompt engine, prompts/
-  validation/             # Zod şemaları
-  constants/              # Platform metadata, örnek makale
-  hooks/                  # useTransform, useClipboard, useHealthCheck
-  utils/                  # retry, sse, cn, api-key-storage, resolve-groq-api-key
+  ai/                          # Provider abstraction, prompt engine, prompts/
+  validation/                  # Zod şemaları
+  constants/                   # Platform metadata, örnek makale
+  hooks/                       # useTransform, useTransformBundle, useClipboard
+  utils/                       # retry, sse, parse-seo-meta, api-key-storage
 types/
   transform.ts
 docs/
-  prompt-explanation.md   # Prompt mühendisliği açıklaması
-samples/                  # Örnek dönüşüm çıktıları
+  prompt-explanation.md        # Prompt mühendisliği açıklaması
+samples/                       # Örnek dönüşüm çıktıları (bundle dahil)
 ```
 
 ## Bu Proje Kapsamı Dışında
@@ -117,7 +139,7 @@ Aşağıdakiler bilinçli olarak kapsam dışı bırakılmıştır:
 - Cloud deployment, CI/CD, Docker zorunluluğu
 - Çok kullanıcılı / production altyapısı
 
-Uygulama lokal, tek kullanıcılı olarak çalışır.
+Uygulama lokal veya BYOK cloud deploy ile tek kullanıcılı olarak çalışır.
 
 ## Neden Bu Mimari?
 
@@ -135,7 +157,7 @@ interface AIProvider {
 
 Detaylı mimari: `architecture.md`  
 Prompt stratejisi: `docs/prompt-explanation.md`  
-Örnek çıktılar: `samples/`
+Örnek çıktılar: `samples/` (tek platform + bundle paketi)
 
 ## Lisans
 

@@ -73,12 +73,15 @@ shadcn/ui on top of Tailwind CSS 4. Bileşenler `components/ui/` altında yaşar
 │ - Karakter/kelime sayacı │ - Çıktı karakter sayacı          │
 │ - Dosya yükle butonu     │ - Kopyala butonu                 │
 ├──────────────────────────┴──────────────────────────────────┤
-│ TransformStepper: Kaynak → Ayarlar → Sonuç (görsel)         │
-│ PlatformSelector: yatay scroll kart grid                    │
+│ TransformModeSelector: mod seçimi (bundle varsayılan)       │
+│ TransformStepper: Kaynak → Ayarlar/Paket → Sonuç            │
+│ [single] PlatformSelector: yatay scroll kart grid           │
 │ TransformSettings: collapsible (ton, kitle, uzunluk)        │
 │ TransformButton: full-width primary CTA                     │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+**TransformModeSelector konumu:** Alt kontrol panelinin en üstünde, `TransformStepper`'dan hemen önce; tam genişlik segmented control. Bundle modunda `PlatformSelector` gizlenir; `TransformSettings` ve `TransformButton` her iki modda görünür. Sağ panel bundle modunda `BundleOutputPanel` (içinde `BundleProgressBar`), single modunda `OutputPanel` gösterir.
 
 ### Tablet (768px–1023px)
 
@@ -87,7 +90,7 @@ shadcn/ui on top of Tailwind CSS 4. Bileşenler `components/ui/` altında yaşar
 
 ### Mobile (<768px)
 
-- Tam dikey stack: Kaynak → Stepper → Platform → Ayarlar → Dönüştür → Çıktı
+- Tam dikey stack: Kaynak → Mod seçici → Stepper → [Platform] → Ayarlar → Dönüştür → Çıktı
 - Platform kartları yatay scroll
 - Header kompakt (yalnızca logo + başlık)
 
@@ -153,6 +156,60 @@ Lucide React. Stroke-based ikonlar only.
 | Streaming | Token-by-token metin + yanıp sönen cursor | Otomatik scroll (kullanıcı scroll etmediyse) |
 | Complete  | Tam metin + aktif Kopyala butonu | Karakter sayacı güncel |
 | Error     | Kırmızı Alert + "Tekrar Dene" butonu | Önceki çıktı temizlenir |
+
+### Bundle Output UX State Matrix
+
+Bundle modu çıktı paneli 5 kart + üstte `BundleProgressBar` içerir: **SEO Başlık**, **Meta Açıklama**, **LinkedIn Post**, **X Thread**, **Instagram Caption**. SEO kartları `seo-meta` section'ından `parseSeoMeta` ile türetilir; sosyal kartlar ilgili section `content`'ini gösterir.
+
+#### Panel genel durumları
+
+| State          | Görünüm | Davranış |
+| -------------- | ------- | -------- |
+| Empty (idle)   | İllüstrasyon + "Kaynak metin girip paketi dönüştürün" | Tüm kartlar pending placeholder; progress bar nötr |
+| Loading        | Tüm kartlar skeleton + progress bar ilk adım (SEO) aktif | Read-only; kopyala disabled |
+| Streaming      | Aktif section kartında `--accent-primary` border + streaming cursor; tamamlanan kartlar dolu | Otomatik scroll aktif karta (kullanıcı scroll etmediyse) |
+| Complete       | 5 kart dolu; her tamamlanmış kartta kopyala aktif | Progress bar tüm adımlar checkmark |
+| Partial Error  | Tamamlanan kartlar dolu + kopyalanabilir; hata kartı kırmızı Alert; sonraki kartlar "Üretilmedi" | Panel altı global Alert + Tekrar Dene → tüm bundle sıfırdan |
+| Error          | Hiç section tamamlanmadıysa global Alert (single error gibi) | Tekrar Dene |
+
+#### Kart bazlı durumlar (her section)
+
+| Section durumu | Görünüm | Token / stil | Davranış |
+| -------------- | ------- | ------------ | -------- |
+| pending        | Boş placeholder veya skeleton satırları | `--bg-elevated`, `--text-muted` | "Üretilmedi" (partial error sonrası) veya boş bekleyen alan |
+| streaming      | Kısmi metin + yanıp sönen cursor | Border `--accent-primary`, cursor `--accent-primary` | İçerik token-by-token birikir; kopyala disabled |
+| complete       | Tam metin + karakter sayacı | Border `--border-default`, check ikonu veya muted border | Kopyala aktif |
+| error          | Kırmızı inline Alert + varsa kısmi içerik | `--state-error`, `--state-error-bg` | Kopyala yalnızca içerik varsa aktif |
+
+#### SEO kartları (SEO Başlık / Meta Açıklama)
+
+| Kart | Kaynak | Sayaç |
+| ---- | ------ | ----- |
+| SEO Başlık | `bundleOutput.seoTitle` (complete) veya `parseSeoMeta(seo-meta content).title` (streaming) | `X/60` |
+| Meta Açıklama | `bundleOutput.seoDescription` (complete) veya parse fallback (streaming) | `X/155` |
+
+Her iki kartın section durumu `bundleOutput.sections["seo-meta"].status` ile senkron kalır.
+
+#### Sosyal kartları (LinkedIn / X Thread / Instagram)
+
+| Kart | Section id | Sayaç |
+| ---- | ---------- | ----- |
+| LinkedIn Post | `linkedin` | Platform limiti (`platforms.ts`) |
+| X Thread | `twitter-thread` | Platform limiti |
+| Instagram Caption | `instagram` | Platform limiti |
+
+#### BundleProgressBar (4 aşama)
+
+Yatay sıra: **SEO** → **LinkedIn** → **X** → **Instagram** (`BUNDLE_SECTIONS` sırası). State `bundleOutput.sections` üzerinden türetilir; bileşen kendi state tutmaz.
+
+| Aşama durumu | Görsel | Token |
+| ------------ | ------ | ----- |
+| pending      | Nötr dolu nokta | `--border-default` / `--text-muted` |
+| streaming    | Spinner veya pulse nokta | `--accent-primary` |
+| complete     | Checkmark ikonu | `--state-success` |
+| error        | X ikonu | `--state-error` |
+
+Adımlar arası ince bağlayıcı çizgi `--border-default`. Global `loading` durumunda ilk adım (SEO) streaming olarak gösterilir.
 
 ### Loading / AI Waiting Experience
 

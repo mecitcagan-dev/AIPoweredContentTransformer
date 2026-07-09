@@ -17,13 +17,32 @@ Bu uygulama bir AI sohbet aracı değildir. Yeni içerik üretmek yerine mevcut 
 
 ## Core User Flow
 
-1. Kullanıcı uygulamayı lokal ortamda açar (`npm run dev`).
-2. İlk açılışta API anahtarı yoksa onboarding diyaloğu görünür; kullanıcı Groq API anahtarını `.env.local` dosyasına ekler ve bağlantıyı test eder.
-3. Kullanıcı kaynak makaleyi sol panele yapıştırır veya `.txt`/`.md` dosyası yükler.
-4. Alt panelden hedef platform kartını seçer (ör. LinkedIn Post).
+### Varsayılan: SEO + Sosyal Medya Paketi (Bundle Mode)
+
+1. Kullanıcı uygulamayı açar (`npm run dev` veya cloud deploy).
+2. İlk açılışta API anahtarı yoksa onboarding diyaloğu görünür; kullanıcı Groq API anahtarını yapılandırır ve bağlantıyı test eder.
+3. **Varsayılan mod** "SEO + Sosyal Medya Paketi"dir — platform seçimi gerekmez.
+4. Kullanıcı kaynak makaleyi sol panele yapıştırır veya `.txt`/`.md` dosyası yükler.
 5. İsteğe bağlı olarak Gelişmiş Ayarlar'dan ton, hedef kitle ve uzunluk belirler.
-6. "Dönüştür" butonuna tıklar; AI çıktısı sağ panelde streaming ile görünür.
-7. Kullanıcı çıktıyı inceler, "Kopyala" ile panoya alır veya farklı bir platform için tekrar dönüştürür.
+6. "Dönüştür"e tıklar; tek işlemde sırayla üretilir: SEO başlık, meta açıklama, LinkedIn postu, X thread, Instagram caption.
+7. Sağ panelde 5 kartlı paket çıktısı streaming ile görünür; her kart ayrı kopyalanabilir.
+
+### Gelişmiş: Tek Platform Seç (bonus mod)
+
+1. Kullanıcı `TransformModeSelector` üzerinden **"Gelişmiş: Tek Platform Seç"** moduna geçer.
+2. Kaynak metni girer, alt panelden **tek bir platform** kartı seçer (ör. LinkedIn Post).
+3. İsteğe bağlı ayarları belirler ve "Dönüştür"e tıklar.
+4. Sağ panelde yalnızca seçilen platform için tek çıktı streaming ile görünür.
+5. Kullanıcı çıktıyı kopyalar veya farklı platform/ayarlarla tekrar dönüştürür.
+
+### Ortak adımlar (her iki mod)
+
+- API anahtarı onboarding ve `/api/health` bağlantı testi
+- Kaynak girişi (yapıştır / dosya / örnek makale)
+- Ton, hedef kitle, uzunluk ayarları (Gelişmiş Ayarlar)
+- SSE streaming çıktı ve panoya kopyalama
+
+**Eski tek-platform akışı (özet):** yapıştır → platform seç → [ayarlar] → dönüştür → kopyala — bundle modunda platform adımı kalkar, 2 tık hedefi (yapıştır → dönüştür) sağlanır.
 
 ## Features
 
@@ -78,10 +97,12 @@ Empty state demosu için yerleşik örnek makale aşağıdaki spec'e uyar:
 
 - Kalan 3 platform: Medium Article, SEO Article, Basın Bülteni
 - Oturum geçmişi (`localStorage`, son 10 dönüşüm)
-- Çıktıyı `.txt` / `.md` olarak indirme
+- Çıktıyı `.txt` / `.md` olarak indirme *(bundle modunda `.md` paket indirme MVP'ye taşındı — aşağıya bakın)*
 - "Yeniden üret", "Kısalt", "Uzat" çıktı aksiyonları
 - Karanlık / aydınlık tema toggle
 - Groq model seçimi (`llama-3.3-70b-versatile` vs `llama-3.1-8b-instant`)
+
+**Bundle MVP notu:** SEO + Sosyal Medya Paketi modunda tamamlanan çıktıların `.md` olarak indirilmesi (`Paketi İndir`) V2 genel indirme kapsamının bundle'a özel öncüsü olarak MVP'de sunulur; tek-platform modunda `.txt`/`.md` indirme V2'de kalır.
 
 ### Future
 

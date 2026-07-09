@@ -36,3 +36,19 @@ export const transformRequestSchema = z.object({
 });
 
 export type TransformRequestInput = z.infer<typeof transformRequestSchema>;
+
+export const bundleRequestSchema = z.object({
+  source: z
+    .string({ message: "Kaynak metin gereklidir" })
+    .min(50, "Kaynak metin en az 50 karakter olmalıdır")
+    .max(8000, "Kaynak metin en fazla 8000 karakter olabilir"),
+  tone: z.enum(toneValues, {
+    message: "Geçerli bir ton seçin",
+  }),
+  audience: z.string().optional(),
+  length: z.enum(lengthValues, {
+    message: "Geçerli bir uzunluk seçin",
+  }),
+});
+
+export type TransformBundleRequestInput = z.infer<typeof bundleRequestSchema>;

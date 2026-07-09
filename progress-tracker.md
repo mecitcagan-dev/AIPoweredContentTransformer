@@ -4,11 +4,11 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Demo Ready
+- Staj Teslim Ready (Bundle Mode dahil)
 
 ## Current Goal
 
-- Vercel deploy testi
+- Opsiyonel: Vercel deploy smoke test (`cloud-deploy` branch)
 
 ## Completed
 
@@ -41,6 +41,22 @@ Update this file after every meaningful implementation change.
 - `app/page.tsx` — ana ekran birleştirme (`useHealthCheck`, tüm transform component'leri, FTUE OnboardingDialog, Sonner toast)
 - Teslim paketi dokümantasyonu — `README.md`, `docs/prompt-explanation.md`, `samples/` (3 örnek çıktı)
 - SourcePanel textarea max-height + scroll davranışı eklendi (`ui-context.md`'ye işlendi)
+- SEO uçtan uca optimizasyon — metadata API (title template, OG, Twitter, robots), `metadataBase`, canonical, viewport, JSON-LD SoftwareApplication
+- `lib/constants/site.ts` — SEO sabitleri, `getSiteUrl()`, `isIndexable()`, OG renk token'ları
+- `app/sitemap.ts` + `app/robots.ts` — dinamik sitemap/robots (env bazlı noindex preview/staging)
+- `app/opengraph-image.tsx` — 1200×630 dinamik OG image (ImageResponse, ui-context renkleri)
+- `public/` favicon seti (placeholder: favicon.ico, icon.png, apple-icon.png) + `scripts/generate-favicons.mjs`
+- `components/layout/AppFooter.tsx` — semantic `<footer>` landmark
+- `app/page.tsx` — OnboardingDialog `next/dynamic` lazy-load, AppFooter entegrasyonu
+- Lighthouse (localhost production): Performance 95, Accessibility 96, Best Practices 100, SEO 100
+- Bundle Mode Adım 1/7 — altyapı (tipler, SSE, prompt, orchestrator) tamamlandı
+- Bundle Mode Adım 2/7 — API route (`/api/transform/bundle`) tamamlandı
+- Bundle Mode Adım 3/7 — useTransformBundle + parse-seo-meta tamamlandı
+- Bundle Mode Adım 4/7 — BundleOutputPanel + BundleProgressBar + ui-context.md bundle matrix tamamlandı
+- Bundle Mode Adım 5/7 — TransformModeSelector + page.tsx wiring tamamlandı
+- Bundle Mode Adım 6/7 — karakter limiti uyarıları + .md paket indirme tamamlandı
+- Bundle Mode Adım 7/7 — teslim dokümantasyonu güncellendi
+- **Bundle Mode (staj gereksinimi) — 7/7 implementasyon planı tamamlandı** (altyapı → API → hook → UI → page → stretch → teslim docs)
 
 ## Cloud Deploy (Branch: `cloud-deploy`)
 
@@ -52,9 +68,8 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
-Implementation sırası (her adım uçtan uca doğrulanır):
-
-1. Vercel deploy testi
+1. Opsiyonel: Vercel deploy smoke test (`repack-app.vercel.app`)
+2. Opsiyonel: Vercel env `NEXT_PUBLIC_SITE_URL` doğrulama
 
 ## Open Questions
 
@@ -90,6 +105,7 @@ Implementation sırası (her adım uçtan uca doğrulanır):
 - API route dosyaları henüz yazılmadı (adım 5–6); `app/api/transform/` ve `app/api/health/` boş klasör olarak hazır.
 - `components/transform/` tamamlandı — 6 component (SourcePanel, OutputPanel, PlatformSelector, TransformSettings, TransformButton, TransformStepper).
 - Teslim paketi tamamlandı: README, `docs/prompt-explanation.md`, `samples/` (3 örnek çıktı).
+- Bundle Mode 7 adımlık plan tamamlandı; `samples/04-bundle-package.md` ve güncellenmiş teslim dokümantasyonu eklendi.
 
 ## Related Documents
 

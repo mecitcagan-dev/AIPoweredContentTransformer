@@ -1,14 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { AppFooter } from "@/components/layout/AppFooter";
 import { Header } from "@/components/layout/Header";
-import { OnboardingDialog } from "@/components/layout/OnboardingDialog";
+import { BundleOutputPanel } from "@/components/transform/BundleOutputPanel";
 import { OutputPanel } from "@/components/transform/OutputPanel";
 import { PlatformSelector } from "@/components/transform/PlatformSelector";
 import { SourcePanel } from "@/components/transform/SourcePanel";
 import { TransformButton } from "@/components/transform/TransformButton";
+import {
+  TransformModeSelector,
+  type TransformMode,
+} from "@/components/transform/TransformModeSelector";
 import { TransformSettings } from "@/components/transform/TransformSettings";
 import { TransformStepper } from "@/components/transform/TransformStepper";
 import { Toaster } from "@/components/ui/sonner";
@@ -19,26 +25,51 @@ import {
 } from "@/lib/constants/platforms";
 import { useHealthCheck } from "@/lib/hooks/useHealthCheck";
 import { useTransform } from "@/lib/hooks/useTransform";
-import type { TransformRequestInput } from "@/lib/validation/transform-schema";
-import type { TransformStep } from "@/types/transform";
+import { useTransformBundle } from "@/lib/hooks/useTransformBundle";
+import type { TransformState } from "@/lib/hooks/useTransform";
+import type {
+  TransformBundleRequestInput,
+  TransformRequestInput,
+} from "@/lib/validation/transform-schema";
+import type {
+  BundleTransformState,
+  TransformStep,
+} from "@/types/transform";
+
+const OnboardingDialog = dynamic(
+  () =>
+    import("@/components/layout/OnboardingDialog").then(
+      (mod) => mod.OnboardingDialog,
+    ),
+  { ssr: false },
+);
 
 const MIN_SOURCE_LENGTH = 50;
 
 /**
  * TransformStepper adım eşlemesi (ui-context.md User Journey sırasına dayanır):
- * kaynak girişi → platform/ayarlar hazırlığı → dönüşüm sonucu.
+ * kaynak girişi → ayarlar/paket hazırlığı → dönüşüm sonucu.
  * Dönüşüm başladığında veya tamamlandığında kullanıcı "Sonuç" adımındadır.
  */
 function deriveCurrentStep(
   source: string,
-  transformState: ReturnType<typeof useTransform>["state"],
+  mode: TransformMode,
+  singleState: TransformState,
+  bundleState: BundleTransformState,
 ): TransformStep {
-  if (
-    transformState === "loading" ||
-    transformState === "streaming" ||
-    transformState === "success" ||
-    transformState === "error"
-  ) {
+  const isResultState =
+    mode === "bundle"
+      ? bundleState === "loading" ||
+        bundleState === "streaming" ||
+        bundleState === "success" ||
+        bundleState === "error" ||
+        bundleState === "partial_error"
+      : singleState === "loading" ||
+        singleState === "streaming" ||
+        singleState === "success" ||
+        singleState === "error";
+
+  if (isResultState) {
     return "result";
   }
 
@@ -50,6 +81,7 @@ function deriveCurrentStep(
 }
 
 export default function HomePage() {
+  const [mode, setMode] = useState<TransformMode>("bundle");
   const [source, setSource] = useState("");
   const [platform, setPlatform] = useState<PlatformId | null>(null);
   const [tone, setTone] = useState<Tone>(TONES.PROFESYONEL);
@@ -58,13 +90,41 @@ export default function HomePage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { hasApiKey, setHasApiKey } = useHealthCheck();
-  const { state, output, error, transform } = useTransform();
+  const {
+    state: singleState,
+    output,
+    error: singleError,
+    transform,
+    reset: resetSingle,
+  } = useTransform();
+  const {
+    bundleOutput,
+    bundleState,
+    error: bundleError,
+    transformBundle,
+    resetBundle,
+  } = useTransformBundle();
 
-  const isTransforming = state === "loading" || state === "streaming";
+  const isSingleTransforming =
+    singleState === "loading" || singleState === "streaming";
+  const isBundleTransforming =
+    bundleState === "loading" || bundleState === "streaming";
+  const isTransforming =
+    mode === "bundle" ? isBundleTransforming : isSingleTransforming;
+
   const isSourceValid = source.trim().length >= MIN_SOURCE_LENGTH;
-  const isTransformDisabled = !platform || !isSourceValid || isTransforming;
+  const isSingleTransformDisabled =
+    !platform || !isSourceValid || isSingleTransforming;
+  const isBundleTransformDisabled = !isSourceValid || isBundleTransforming;
+  const isTransformDisabled =
+    mode === "bundle" ? isBundleTransformDisabled : isSingleTransformDisabled;
 
-  const currentStep = deriveCurrentStep(source, state);
+  const currentStep = deriveCurrentStep(
+    source,
+    mode,
+    singleState,
+    bundleState,
+  );
 
   const platformLabel = useMemo(() => {
     if (!platform) {
@@ -90,13 +150,37 @@ export default function HomePage() {
     };
   }, [audience, isSourceValid, length, platform, source, tone]);
 
+  const bundleRequest = useMemo((): TransformBundleRequestInput | null => {
+    if (!isSourceValid) {
+      return null;
+    }
+
+    const trimmedAudience = audience.trim();
+
+    return {
+      source,
+      tone,
+      audience: trimmedAudience.length > 0 ? trimmedAudience : undefined,
+      length,
+    };
+  }, [audience, isSourceValid, length, source, tone]);
+
   const handleTransform = useCallback(() => {
+    if (mode === "bundle") {
+      if (!bundleRequest) {
+        return;
+      }
+
+      void transformBundle(bundleRequest);
+      return;
+    }
+
     if (!transformRequest) {
       return;
     }
 
     void transform(transformRequest);
-  }, [transform, transformRequest]);
+  }, [bundleRequest, mode, transform, transformBundle, transformRequest]);
 
   const handleRetry = useCallback(() => {
     handleTransform();
@@ -122,17 +206,21 @@ export default function HomePage() {
     [hasApiKey],
   );
 
+  const handleModeChange = useCallback(
+    (nextMode: TransformMode) => {
+      if (nextMode === mode) {
+        return;
+      }
+
+      resetSingle();
+      resetBundle();
+      setMode(nextMode);
+    },
+    [mode, resetBundle, resetSingle],
+  );
+
   const onboardingOpen = hasApiKey !== true || settingsOpen;
   const onboardingClosable = hasApiKey === true && settingsOpen;
-
-  const outputPanelProps = {
-    state,
-    output,
-    error,
-    platformLabel,
-    onRetry: handleRetry,
-    onCopySuccess: handleCopySuccess,
-  };
 
   return (
     <div className="flex min-h-screen flex-col bg-bg-base">
@@ -145,16 +233,40 @@ export default function HomePage() {
           </div>
 
           <div className="order-3 lg:order-2 lg:col-start-2 lg:row-start-1">
-            <OutputPanel {...outputPanelProps} />
+            {mode === "bundle" ? (
+              <BundleOutputPanel
+                bundleState={bundleState}
+                bundleOutput={bundleOutput}
+                error={bundleError}
+                onRetry={handleRetry}
+                onCopySuccess={handleCopySuccess}
+              />
+            ) : (
+              <OutputPanel
+                state={singleState}
+                output={output}
+                error={singleError}
+                platformLabel={platformLabel}
+                onRetry={handleRetry}
+                onCopySuccess={handleCopySuccess}
+              />
+            )}
           </div>
 
           <div className="order-2 flex flex-col gap-4 border-b border-border-default py-4 lg:order-3 lg:col-span-2 lg:row-start-2 lg:border-t lg:border-b-0">
-            <TransformStepper currentStep={currentStep} />
-            <PlatformSelector
-              selected={platform}
-              onSelect={setPlatform}
+            <TransformModeSelector
+              mode={mode}
+              onModeChange={handleModeChange}
               disabled={isTransforming}
             />
+            <TransformStepper currentStep={currentStep} mode={mode} />
+            {mode === "single" && (
+              <PlatformSelector
+                selected={platform}
+                onSelect={setPlatform}
+                disabled={isSingleTransforming}
+              />
+            )}
             <TransformSettings
               tone={tone}
               onToneChange={setTone}
@@ -171,6 +283,8 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
+      <AppFooter />
 
       <OnboardingDialog
         open={onboardingOpen}

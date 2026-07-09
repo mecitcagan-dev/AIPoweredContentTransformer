@@ -200,6 +200,8 @@ app/api/ → lib/ai/, lib/validation/
 7. **Tutarlı hata formatı** — JSON hatalar `{ error: string }` shape'inde döner.
 8. **Auth/DB yok** — MVP'de authentication, veritabanı veya harici storage kullanılmaz.
 9. **Yeni transform isteği önceki stream'i iptal eder** — Yeni dönüştürme başladığında client tarafında `AbortController` ile önceki fetch/SSE iptal edilir; kısmi çıktı temizlenir (`useTransform` hook'u).
+10. **Bundle SSE event'leri single parser'ı kırmaz** — Bundle modu `section_start` / `section_end` ve `{ section, content }` chunk payload'ları kullanır; mevcut single-mode `encodeChunkEvent` ve `useTransform` parser'ı değişmez (geriye uyumlu).
+11. **Bundle modunda yalnızca bir aktif stream** — Yeni bundle isteği başladığında önceki `AbortController` abort edilir; tüm section state'leri (`BundleOutput.sections`) sıfırlanır (`useTransformBundle` hook'u).
 
 ## Architecture Decisions (cloud-deploy)
 

@@ -4,13 +4,22 @@ import { cn } from "@/lib/utils";
 
 export type TransformStep = "source" | "settings" | "result";
 
+export type TransformStepperMode = "bundle" | "single";
+
 export interface TransformStepperProps {
   currentStep: TransformStep;
+  mode?: TransformStepperMode;
 }
 
-const STEPS: { id: TransformStep; label: string }[] = [
+const STEPS_SINGLE: { id: TransformStep; label: string }[] = [
   { id: "source", label: "Kaynak" },
   { id: "settings", label: "Ayarlar" },
+  { id: "result", label: "Sonuç" },
+];
+
+const STEPS_BUNDLE: { id: TransformStep; label: string }[] = [
+  { id: "source", label: "Kaynak" },
+  { id: "settings", label: "Paket" },
   { id: "result", label: "Sonuç" },
 ];
 
@@ -34,15 +43,20 @@ function getStepStatus(
   return "upcoming";
 }
 
-export function TransformStepper({ currentStep }: TransformStepperProps) {
+export function TransformStepper({
+  currentStep,
+  mode = "single",
+}: TransformStepperProps) {
+  const steps = mode === "bundle" ? STEPS_BUNDLE : STEPS_SINGLE;
+
   return (
     <nav
       aria-label="Dönüşüm adımları"
       className="flex items-center justify-center gap-2 px-4 py-3 md:px-6"
     >
-      {STEPS.map((step, index) => {
+      {steps.map((step, index) => {
         const status = getStepStatus(step.id, currentStep);
-        const isLast = index === STEPS.length - 1;
+        const isLast = index === steps.length - 1;
 
         return (
           <div key={step.id} className="flex items-center gap-2">

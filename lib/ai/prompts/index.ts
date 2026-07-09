@@ -1,3 +1,4 @@
+import type { BundleSectionId } from "@/lib/ai/types";
 import { PLATFORM_IDS, type PlatformId } from "@/lib/constants/platforms";
 
 import { BULLET_SUMMARY_PROMPT } from "./bullet-summary";
@@ -6,6 +7,7 @@ import { FACEBOOK_PROMPT } from "./facebook";
 import { INSTAGRAM_PROMPT } from "./instagram";
 import { LINKEDIN_PROMPT } from "./linkedin";
 import { NEWSLETTER_PROMPT } from "./newsletter";
+import { SEO_META_PROMPT } from "./seo-meta";
 import { SHORT_SUMMARY_PROMPT } from "./short-summary";
 import { TWITTER_THREAD_PROMPT } from "./twitter-thread";
 
@@ -25,4 +27,13 @@ export const PLATFORM_PROMPTS = {
 /** Platform prompt metnini id ile döndürür. */
 export function getPlatformPrompt(platformId: PlatformId): string {
   return PLATFORM_PROMPTS[platformId];
+}
+
+/** Bundle section prompt metnini id ile döndürür. */
+export function getBundleSectionPrompt(section: BundleSectionId): string {
+  if (section === "seo-meta") {
+    return SEO_META_PROMPT;
+  }
+
+  return PLATFORM_PROMPTS[section];
 }

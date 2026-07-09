@@ -1,8 +1,14 @@
 import {
+  getBundleSectionPrompt,
   getPlatformPrompt,
   SYSTEM_PROMPT,
 } from "@/lib/ai/prompts";
-import type { Length, Tone, TransformRequest } from "@/lib/ai/types";
+import type {
+  BundleSectionId,
+  Length,
+  Tone,
+  TransformRequest,
+} from "@/lib/ai/types";
 
 const TONE_PROMPT_VALUES: Record<Tone, string> = {
   Profesyonel: "Resmi, güvenilir, sektörel dil; jargon ölçülü",
@@ -68,6 +74,30 @@ export function buildMessages(request: TransformRequest): PromptMessage[] {
         request.tone,
         request.audience,
         request.length,
+      ),
+    },
+  ];
+}
+
+/** Bundle section için system ve user mesajlarını oluşturur. */
+export function buildBundleSectionMessages(
+  section: BundleSectionId,
+  base: Omit<TransformRequest, "platform">,
+): PromptMessage[] {
+  const sectionPrompt = getBundleSectionPrompt(section);
+
+  return [
+    {
+      role: "system",
+      content: SYSTEM_PROMPT + sectionPrompt,
+    },
+    {
+      role: "user",
+      content: buildUserPrompt(
+        base.source,
+        base.tone,
+        base.audience,
+        base.length,
       ),
     },
   ];
